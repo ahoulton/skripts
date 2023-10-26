@@ -1,4 +1,0 @@
-on chat:
-    set {_c} to "&7" if player's group is "default"
-    set {_c} to "&f" if player's group isn't "default"
-    set the chat format to "%player's prefix%%player%%{_c}%: %{_c}%%message%"
