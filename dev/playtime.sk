@@ -1,0 +1,57 @@
+# WANT TO:
+# ADD TOTAL TIME AND CALCULATE IT TO HOURS, MINUTES AND SECONDS TO SPARE TWO VARIABLES.
+
+function checkTime(p: player):
+	set {_uuid} to {_p}'s uuid
+	if {playtime::%{_uuid}%::second} >= 60:
+		set {playtime::%{_uuid}%::second} to 0
+		add 1 to {playtime::%{_uuid}%::minute}
+	if {playtime::%{_uuid}%::minute} >= 60:
+		set {playtime::%{_uuid}%::minute} to 0
+		set {playtime::%{_uuid}%::second} to 0
+		add 1 to {playtime::%{_uuid}%::hour}
+	else if {playtime::%{_uuid}%::hour} >= 24:
+		set {playtime::%{_uuid}%::hour} to 0
+		set {playtime::%{_uuid}%::minute} to 0
+		set {playtime::%{_uuid}%::second} to 0
+		add 1 to {playtime::%{_uuid}%::day}
+
+function checkPTABStatus(p: player):
+	set {_uuid} to {_p}'s uuid
+	if {playtime::%{_uuid}%::actionbar} is true:
+		set {_uuid} to {_p}'s uuid
+		set {_day} to {playtime::%{_uuid}%::day} if {playtime::%{_uuid}%::day} is set
+		set {_day} to "N/A" if {playtime::%{_uuid}%::day} isn't set
+		set {_hour} to {playtime::%{_uuid}%::hour} if {playtime::%{_uuid}%::hour} is set
+		set {_hour} to "N/A" if {playtime::%{_uuid}%::hour} isn't set
+		set {_minute} to {playtime::%{_uuid}%::minute} if {playtime::%{_uuid}%::minute} is set
+		set {_minute} to "N/A" if {playtime::%{_uuid}%::minute} isn't set
+		set {_second} to {playtime::%{_uuid}%::second} if {playtime::%{_uuid}%::second} is set
+		set {_second} to "N/A" if {playtime::%{_uuid}%::second} isn't set
+		send action bar "Playtime: %{_day}% day(s), %{_hour}% hour(s), %{_minute}% minute(s) and %{_second}% second(s)." to {_p}
+	stop
+
+on join:
+	set {playtime::%player's uuid%::actionbar} to false if {playtime::%player's uuid%::actionbar} isn't set
+	set {playtime::%player's uuid%::day} to 0 if {playtime::%player's uuid%::day} isn't set
+	set {playtime::%player's uuid%::hour} to 0 if {playtime::%player's uuid%::hour} isn't set
+	set {playtime::%player's uuid%::minute} to 0 if {playtime::%player's uuid%::minute} isn't set
+	set {playtime::%player's uuid%::second} to 0 if {playtime::%player's uuid%::second} isn't set
+	while player is online:
+		add 1 to {playtime::%player's uuid%::second}
+		checkTime(player)
+		checkPTABStatus(player)
+		wait 1 second
+
+command /playtime <player=%player%>:
+	trigger:
+		send "%arg 1% has played for: %{playtime::%player's uuid%::day}% day(s), %{playtime::%player's uuid%::hour}% hour(s), %{playtime::%player's uuid%::minute}% minute(s) and %{playtime::%player's uuid%::second}% second(s)." to sender
+	
+command /playtime:toggleactionbar:
+	trigger:
+		if {playtime::%player's uuid%::actionbar} is false: 
+			set {playtime::%player's uuid%::actionbar} to true
+			send "&aYour playtime will now display above your hotbar."
+		else if {playtime::%player's uuid%::actionbar} is true:
+			set {playtime::%player's uuid%::actionbar} to false
+			send "&cYour playtime will no longer show above your hotbar."

@@ -1,0 +1,137 @@
+options:
+	rightclick: &7&o(Right-Click)
+	basecolor: &e&l&o
+
+on join:
+	set {_uuid} to player's uuid
+	if {data::%{_uuid}%::visibility} is false:
+		hide player from all players
+		hide all players from player
+	else if {data::%{_uuid}%::visibility} is true:
+		reveal player to all players
+		reveal all players to player
+	setItems(player)
+
+function setItems(p: player):
+	clear {_p}'s inventory
+	set slot 0 of {_p}'s inventory to compass named "{@basecolor}Main Menu {@rightclick}"
+	set slot 2 of {_p}'s inventory to nether star named "{@basecolor}Aura Menu {@rightclick}"
+	set slot 3 of {_p}'s inventory to {_p}'s head named "{@basecolor}Account Menu {@rightclick}"
+	set slot 4 of {_p}'s inventory to chest named "{@basecolor}Cosmetics {@rightclick}"
+	set slot 7 of {_p}'s inventory to redstone torch named "{@basecolor}Toggle Player Visibility {@rightclick}"
+	set slot 8 of {_p}'s inventory to clock named "{@basecolor}Lobby Selector {@rightclick}"
+
+function checkItem(p: player, i: item):
+	if difference between {temp::cd::%{_p}%} and now < 0.5 second:
+		stop
+	else:
+		set {temp::cd::%{_p}%} to now
+		if {_i} is compass named "{@basecolor}Main Menu {@rightclick}":
+			openGUI("main_menu", {_p})
+		if {_i} is nether star named "{@basecolor}Aura Menu {@rightclick}":
+			openGUI("aura_menu", {_p})
+		if {_i} is {_p}'s head named "{@basecolor}Account Menu {@rightclick}":
+			openGUI("account_menu", {_p})
+		if {_i} is chest named "{@basecolor}&oCosmetics {@rightclick}":
+			make {_p} execute command "cosmetics"
+		if {_i} is redstone torch named "{@basecolor}Toggle Player Visibility {@rightclick}":
+			toggleVisibility({_p})
+		if {_i} is clock named "{@basecolor}Lobby Selector {@rightclick}":
+			openGUI("lobby_selector", {_p})
+
+on left click:
+	checkItem(player, event-item) if event-item isn't air
+
+on right click:
+	checkItem(player, event-item) if event-item isn't air
+
+function toggleVisibility(p: player):
+	set {_uuid} to {_p}'s uuid
+	if {data::%{_uuid}%::visibility} is true:
+		hide {_p} from all players
+		hide all players from {_p}
+		set {data::%{_uuid}%::visibility} to false
+		send "&bPlayer visibility toggled: &cOFF" to {_p}
+	else if {data::%{_uuid}%::visibility} is false:
+		reveal {_p} to all players
+		reveal all players to {_p}
+		set {data::%{_uuid}%::visibility} to true
+		send "&bPlayer visibility toggled: &aON" to {_p}
+
+function openGUI(t: text, p: player):
+	if {_t} is "main_menu":
+		create a gui with virtual chest inventory with 6 rows named "Where to?":
+			make gui 3 with bedrock named "&e&lFeatured Servers" with lore "%nl%&fMore coming soon :)":
+				stop
+			make gui 4 with bedrock named "&e&lFeatured Servers" with lore "%nl%&fMore coming soon :)":
+				stop
+			make gui 5 with bedrock named "&e&lFeatured Servers" with lore "%nl%&fMore coming soon :)":
+				stop
+			make gui 19 with diamond sword named "&aPvP Servers" with lore "%nl%&7See all online PvP servers!":
+				stop
+			make gui 20 with grass block named "&aSMP Servers" with lore "%nl%&7See all online SMP servers!":
+				stop
+			make gui 21 with paper named "&aGen Servers" with lore "%nl%&7See all online Gen servers!":
+				stop
+			make gui 22 with wheat named "&aFarming Servers" with lore "%nl%&7See all online Farming servers!":
+				stop
+			make gui 23 with iron bars named "&aPrison Servers" with lore "%nl%&7See all online Prison servers!":
+				stop
+			make gui 24 with campfire named "&aRPG Servers" with lore "%nl%&7See all online RPG servers!":
+				stop
+			make gui 25 with crafting table named "&aMinigame Servers" with lore "%nl%&7See all online Minigame servers!":
+				stop
+			make gui 28 with warped nylium named "&aSkyblock Servers" with lore "%nl%&7See all online Skyblock servers!":
+				stop
+			make gui 29 with iron sword named "&a1.8 PvP Servers" with lore "%nl%&7See all online 1.8 PvP servers!":
+				stop
+			make gui 30 with writable book named "&aRoleplay Servers" with lore "%nl%&7See all online Roleplay servers!":
+				stop
+			make gui 31 with chainmail chestplate named "&aFactions Servers" with lore "%nl%&7See all online Factions servers!":
+				stop
+			make gui 32 with anvil named "&aModded Servers" with lore "%nl%&7See all online Modded servers!":
+				stop
+			make gui 33 with cake named "&aCreative Servers" with lore "%nl%&7See all online Creative servers!":
+				stop
+			make gui 34 with turtle egg named "&aPixelmon Servers" with lore "%nl%&7See all online Pixelmon servers!":
+				stop
+			make gui 46 with book named "&aAll Servers" with lore "%nl%&7See all online servers!":
+				stop
+			make gui 48 with totem of undying named "&aJoin a Random Server" with lore "%nl%&7Go to a random running server!":
+				stop
+			make gui 50 with golden apple named "&aFavorited Servers" with lore "%nl%&7View your favorited servers!":
+				stop
+			make gui 52 with banner named "&aServer History" with lore "%nl%&7View your server history!":
+				stop
+		open last gui for {_p}
+	if {_t} is "aura_menu":
+		create a gui with virtual chest inventory with 2 rows named "Aura Menu":
+			if {_p}'s group isn't "default":
+				make gui 0 with black wool named "&cComing Soon":
+					stop
+			make gui 17 with barrier named "&cClear Aura":
+				stop
+		open last gui for {_p}
+	if {_t} is "account_menu":
+		set {_uuid} to {_p}'s uuid
+		set {_rank} to {_p}'s group in uppercase if {_p}'s group isn't "default"
+		set {_rank} to "Default" if {_p}'s group is "default"
+		set {_initialjoin} to {data::%{_uuid}%::initialjoin} if {data::%{_uuid}%::initialjoin} is set
+		set {_initialjoin} to "Unknown" if {data::%{_uuid}%::initialjoin} isn't set
+		create a gui with virtual chest inventory with 5 rows named "Account":
+			make gui 13 with {_p}'s head named "%{_p}'s prefix%%{_p}%" with lore "%nl%&7Rank: &f%{_rank}%%nl%&7Initial Join: &f%{_initialjoin}%%nl%&7Friends: &f0":
+				stop
+			make gui 29 with red wool named "&fFriend Requests" with lore "%nl%&fOff":
+				stop
+			make gui 30 with red wool named "&fFriend Teleports" with lore "%nl%&fOff":
+				stop
+			make gui 31 with red wool named "&fPlayer Finding" with lore "%nl%&fOff":
+				stop
+			make gui 32 with red wool named "&fPrivate Messages" with lore "%nl%&fNone":
+				stop
+		open last gui for {_p}
+	if {_t} is "lobby_selector":
+		create a gui with virtual chest inventory with 4 rows named "Lobby Selector":
+			make gui 0 with compass named "&fLobby 0" with lore "%nl%&7%amount of all players%/%max players% players":
+				stop
+		open last gui for {_p}

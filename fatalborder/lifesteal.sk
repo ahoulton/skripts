@@ -1,0 +1,69 @@
+options:
+	prefix: &cfatalness &7-
+
+on death:
+	victim is a player
+	attacker is a player
+	if victim's max health = 1 or 0.5 or 0:
+		wait 2 ticks
+		if player doesn't have permission "rank.helper":
+			set victim's max health to 10
+			ban player because of "You are deathbanned." for 1 hour
+			set {lifesteal::deathban::%player%} to true
+			kick player due to "You are deathbanned."
+			delete {lifesteal::deathban::%player%}
+			send "{@prefix} &e%victim's displayname% &ehas been eliminated for 1 hour!" to all players
+		else:
+			set victim's max health to 10
+			send "{@prefix} &bYou would have been eliminated for a hour, had you not been staff." to victim
+	if attacker's max health is less than or equal to 49:
+		add 1 to attacker's max health
+		remove 1 from victim's max health
+		stop
+	else if attacker's max health = 50:
+		remove 1 from victim's max health
+		give attacker red dye named "&cHeart &7(&rRight Click to use&7)" with lore "&7This heart is not fake."
+		send "{@prefix} &7&oYou have max health so you gained 1 heart item!&7&o!" to attacker
+		stop
+
+on right click:
+	player is holding red dye:
+		name of player's tool is "&cHeart &7(&rRight Click to use&7)":
+			if player's max health is less than or equal to 49:
+				add 1 to player's max health
+				send "{@prefix} &7You used a health item, increased hearts by 1!"
+				remove 1 red dye from player's inventory
+			if player's max health is greater than or equal to 50:
+				send "{@prefix} &cYou are currently already at maximum health!"
+
+command /withdraw [<integer>]:
+	trigger:
+		arg-1 is greater than 0
+		if player's max health is greater than or equal to 2:
+			if arg-1 is less than player's max health:
+				if player has enough space for a red dye named "&cHeart &7(&rRight Click to use&7)":
+					remove arg-1 from player's max health
+					loop arg-1 times:
+						give player red dye named "&cHeart &7(&rRight Click to use&7)" with lore "&7This heart is not fake."
+					send "{@prefix} &aWithdrew %arg-1% hearts and put them into your inventory!" to player
+				else:
+					send "{@prefix} &cYou do not have enough inventory space!" to player
+			else:
+				send "{@prefix} &cYou do not have enough hearts to do this without death-banning you!" to player
+		else: 
+			send "{@prefix} &cYou do not have enough hearts to use this command!" to player
+
+command /sethealth [<offline player>] [<integer>]:
+	permission: rank.admin
+	trigger:
+		set arg-1's max health to arg-2
+		send "{@prefix} &bYou set the players max health to &c%arg-2%"
+
+command /giveallheart <integer>:
+	permission: rank.admin
+	usage: &c/giveallheart <number>
+	trigger:
+		loop all players:
+			set {_amount} to arg-1
+			give loop-player {_amount} of red dye named "&cHeart &7(&rRight Click to use&7)" with lore "&7This heart is not fake."
+		stop

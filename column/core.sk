@@ -1,0 +1,12 @@
+on break:
+    player's tool can break event-block
+    cancel drops
+
+command /pick:
+    trigger:
+        set {_pick} to unbreakable netherite pickaxe named "&dPickaxe"
+        if player's inventory contains {_pick}:
+            send "You already have a pickaxe!" to player
+            stop
+        enchant {_pick} with efficiency 255
+        give player {_pick}

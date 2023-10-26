@@ -1,0 +1,260 @@
+function isInModMode(p: player) :: boolean:
+	set {_uuid} to {_p}'s uuid
+	if {prefs::%{_uuid}%::modmode} is true:
+		return true
+	if {prefs::%{_uuid}%::modmode} is false:
+		return false
+	else if {prefs::%{_uuid}%::modmode} isn't set:
+		return false
+		
+function giveStaffItems(p: player):
+	clear {_p}'s inventory
+	equip {_p} with unbreakable leather helmet
+	set {_p}'s chestplate to air
+	set {_p}'s leggings to air
+	set {_p}'s boots to air
+	set slot 0 of {_p} to compass named "&dWorldEdit Compass"
+	set slot 1 of {_p} to wooden axe named "&dWorldEdit Wand"
+	set slot 2 of {_p} to paper named "&cView Reports"
+	set slot 4 of {_p} to clock named "&eRandom Teleport"
+	set slot 6 of {_p} to {_p}'s head named "&bOnline Staff"
+	set slot 7 of {_p} to name tag named "&aStaff Chat Toggle"
+	set slot 8 of {_p} to barrier named "&cDisable Moderator Mode"
+
+on join:
+	if player has permission "rank.mod":
+		set {prefs::%player's uuid%::modmode} to false if {prefs::%player's uuid%::modmode} isn't set
+	isInModMode(player) is true
+	make player execute command "alerts"
+	giveStaffItems(player)
+	wait 1 tick
+	set player's gamemode to creative
+	set player's flight mode to true if player's flight mode isn't true
+
+command /mod:
+	aliases: /staffmode, /modmode
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		if isInModMode(player) is false:
+			make player execute command "/sv on"
+			set {temp::bypassalerttoggle::%player%} to true
+			make player execute command "/alerts"
+			delete {temp::bypassalerttoggle::%player%}
+			teleport player to {location::spawn}
+			set player's gamemode to creative
+			set player's flight mode to true if player's flight mode is false
+			giveStaffItems(player)
+			set {prefs::%player's uuid%::modmode} to true
+			add player's uuid to {sctoggled::*} if {sctoggled::*} doesn't contain player's uuid
+		else if isInModMode(player) is true:
+			make player execute command "/sv off"
+			set {temp::bypassalerttoggle::%player%} to true
+			make player execute command "/alerts"
+			delete {temp::bypassalerttoggle::%player%}
+			teleport player to {location::spawn}
+			set player's gamemode to adventure
+			set player's flight mode to false if player's flight mode is true
+			clear player's inventory
+			set player's helmet to air
+			set {prefs::%player's uuid%::modmode} to false
+			remove player's uuid from {sctoggled::*} if {sctoggled::*} contains player's uuid
+
+function checkStaffItem(p: player, i: item):
+	if {_i} is clock named "&eRandom Teleport":
+		set {_players::*} to all players
+		remove "%{_p}%" parsed as player from {_players::*}
+		set {_rp} to a random element of {_players::*}
+		if {_rp} isn't set:
+			send action bar "&cNot enough players online! Must be atleast 2 players online." to {_p}
+			stop
+		make {_p} execute command "/tp %{_rp}%"
+	if {_i} is {_p}'s head named "&bOnline Staff":
+		create a gui with virtual chest inventory with 3 rows named "Online Staff":
+			set {_staff::*} to all players where [input has permission "rank.mod"]
+			set {_slot} to 0
+			loop {_staff::*}:
+				set {_lv} to loop-value
+				make gui {_slot} with loop-value's head named "%loop-value's prefix%%loop-value%" with lore "%nl%&7Mod Mode: &e%{prefs::%loop-value's uuid%::modmode}%":
+					make {_p} execute command "/tp %{_lv}%"
+				add 1 to {_slot}
+		open last gui for {_p}
+	if {_i} is name tag named "&aStaff Chat Toggle":
+		make {_p} execute command "/sctoggle"
+	if {_i} is paper named "&cView Reports":
+		make {_p} execute command "/reports"
+	if {_i} is barrier named "&cDisable Moderator Mode":
+		make {_p} execute command "/mod"
+
+on command:
+	command starts with "alerts"
+	if isInModMode(sender) is false:
+		{temp::bypassalerttoggle::%player%} isn't set
+		player has permission "vulcan.alerts"
+		cancel event
+		send "&cYou can only see alerts if you are in Mod Mode &7(&o/mod)&r&c."
+
+on inventory click:
+	isInModMode(player) is true
+	cancel event
+
+on left click:
+	isInModMode(player) is true
+	checkStaffItem(player, event-item)
+
+on right click:
+	isInModMode(player) is true
+	checkStaffItem(player, event-item)
+
+on break:
+	isInModMode(player) is true
+	cancel event
+
+on place:
+	isInModMode(player) is true
+	cancel event
+
+command /gma:
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		set player's gamemode to adventure
+
+command /gmc:
+	permission: rank.admin
+	permission message: &cNo permission.
+	trigger:
+		set player's gamemode to creative
+
+command /gmsp:
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		set player's gamemode to spectator
+
+on load:
+	set {chatmuted} to false if {chatmuted} isn't set
+
+command /mutechat:
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		if {chatmuted} is false:
+			set {chatmuted} to true
+			send "&cChat is now muted &7(by: &6%sender's displayname%&7)." to all players
+		else if {chatmuted} is true:
+			set {chatmuted} to false
+			send "&aChat is now unmuted &7(by: &6%sender's displayname%&7)." to all players
+
+command /sc <text>:
+	executable by: players
+	permission: rank.mod
+	permission message: &cNo permission.
+	usage: &cCorrect usage: /sc <message>
+	trigger:
+		send "&7[STAFF] %sender's prefix%%sender's displayname%&7: &f%arg 1%" to all players where [input has permission "rank.mod"]
+
+command /sctoggle:
+	executable by: players
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		if {sctoggled::*} doesn't contain player's uuid:
+			add player's uuid to {sctoggled::*}
+			send "&aAny messages you send will be forwarded to staff chat."
+		else if {sctoggled::*} contains player's uuid:
+			remove player's uuid from {sctoggled::*}
+			send "&cAny messages you send will NOT be forwarded to staff chat."
+
+command /tp <player>:
+	executable by: players
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		if arg 1 is player:
+			send action bar "&cYou cannot teleport to yourself." to player
+			stop
+		teleport player to arg-1
+		send action bar "&7Teleported to: &f%arg 1's prefix%%arg 1%" to sender
+		
+command /tphere <player>:
+	executable by: players
+	permission: rank.mod
+	permission message: &cNo permission.
+	trigger:
+		if arg 1 is player:
+			send action bar "&cYou cannot teleport to yourself." to player
+			stop
+		teleport arg-1 to player
+		send action bar "&7Teleported &f%arg 1's prefix%%arg 1% &7to &eyou&7." to sender
+	
+command /request <text>:
+	executable by: players
+	cooldown: 3 second
+	cooldown message: &cYou must wait atleast 3 seconds before using this again.
+	usage: &cCorrect usage: /request <reason>
+	trigger:
+		send "&7[STAFF] %sender's prefix%%sender's displayname% &7has requested assistance: &e%arg 1%" to all players where [input has permission "rank.mod"]
+		send "&aYour request has been sent to all online staff." to sender
+
+command /debug:testreport <number>:
+	permission: op
+	trigger:
+		set {_reports} to size of {reports::*}
+		set {_s} to 1
+		if arg-1 > 54:
+			send "too many for the gui!" to sender
+			stop
+		if {_reports} >= 54:
+			send "&cThe report queue is full, please try again later." to player
+			stop
+		loop arg-1 times:
+			add "&cReporter: &f%sender's displayname% &7- &cSuspect: &fDebugger &7- &cReason: &f%{_s}%" to {reports::*}
+			add 1 to {_s}
+		send "generated %arg-1% test report(s)." to sender
+
+command /resetreports:
+	aliases: /deletereports, /clearreports
+	permission: staff.reports
+	permission message: &cNo Permission
+	trigger:
+		delete {reports::*}
+		send "&7[&cREPORT&7] &7Reports have been cleared by &c%player%." to all players where [input has permission "rank.mod"]
+
+every 60 minutes:
+	set {_reports} to size of {reports::*}
+	if {_reports} >= 54:
+		delete {reports::*}
+		send "&7[&cREPORT&7] &cReports have been auto-cleared." to all players where [input has permission "rank.mod"]
+		stop
+
+command /report <player> <text>:
+	trigger:
+		if arg-1 is not set:
+			send "&c/report <player> <text>"
+		if arg-2 is not set:
+			send "&c/report <player> <text>"
+		else:
+			set {_reports} to size of {reports::*}
+			if {_reports} >= 54:
+				send "&cThe report queue is full, please try again later." to player
+				stop
+			add "&cReporter: &f%sender's displayname% &7- &cSuspect: &f%arg-1's displayname% &7- &cReason: &f%arg-2%" to {reports::*}
+			send "&aYour report has been sent." to sender
+			send "&7[&cREPORT&7] A new report has been filed. &7&o(/reports)" to all players where [input has permission "rank.mod"]
+			play sound "block.note_block.pling" to all players where [input has permission "rank.mod"]
+
+command /reports:
+	permission: staff.reports
+	trigger:
+		create a gui with virtual chest inventory with 6 rows named "Reports":
+			set {_slot} to 0
+			loop {reports::*}:
+				make gui {_slot} with paper named "%loop-value%" with lore "&7&oClick to remove report.":
+					loop {reports::*}:
+						remove "%loop-value%" from {reports::*} if {reports::*} contains "%loop-value%"
+						send "&7[&cREPORT&7] &cRemoved report." to player
+						close inventory for player
+						stop
+				add 1 to {_slot}
+		open last gui for player

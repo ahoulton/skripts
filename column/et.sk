@@ -1,0 +1,123 @@
+function checkRequiredXP(p: player) :: number:
+    set {_uuid} to {_p}'s uuid
+    return {levels::level::%{_uuid}%} * 1000
+
+function checkXP(p: player):
+    set {_uuid} to {_p}'s uuid
+    set {_required} to checkRequiredXP({_p})
+    if {levels::xp::%{_uuid}%} >= {_required}:
+        set {levels::level::%{_uuid}%} to {levels::level::%{_uuid}%} + 1
+        set {levels::xp::%{_uuid}%} to 0
+        set {_oldlevel} to {levels::level::%{_uuid}%} - 1
+        set {_level} to {levels::level::%{_uuid}%}
+        send title "&2&k|| &a&lLEVEL UP! &r&2&k||" with subtitle "%levelColor({_oldlevel})%%{_oldlevel}% &7> %levelColor({_level})%%{_level}%" to {_p}
+        play sound "minecraft:entity.experience_orb.pickup" with volume 100 and pitch 1 to {_p}
+        stop
+    stop
+
+function getLevel(p: player) :: number:
+    set {_uuid} to {_p}'s uuid
+    return {levels::level::%{_uuid}%}
+    stop
+
+function getXP(p: player) :: number:
+    set {_uuid} to {_p}'s uuid
+    return {levels::xp::%{_uuid}%}
+    stop
+
+function giveET(p: player, e: block):
+    set {_uuid} to {_p}'s uuid
+    set {_amount} to 1 if {_e} is stone
+    set {_amount} to 1 if {_e} is coal ore or deepslate coal ore
+    set {_amount} to 2 if {_e} is copper ore or deepslate copper ore
+    set {_amount} to 5 if {_e} is iron ore or deepslate iron ore
+    set {_amount} to 5 if {_e} is gold ore or deepslate gold ore
+    set {_amount} to 5 if {_e} is emerald ore or deepslate emerald ore
+    set {_amount} to 5 if {_e} is redstone ore or deepslate redstone ore
+    set {_amount} to 5 if {_e} is lapis ore or deepslate lapis ore
+    set {_amount} to 10 if {_e} is diamond ore or deepslate diamond ore
+    set {_amount} to 4 if {_e} is nether gold ore
+    set {_amount} to 4 if {_e} is nether quartz ore
+    set {_amount} to 40 if {_e} is ancient debris
+    #---------------------#
+    set {_amountt} to 1 if {_e} is stone
+    set {_amountt} to 1 if {_e} is coal ore or deepslate coal ore
+    set {_amountt} to 2 if {_e} is copper ore or deepslate copper ore
+    set {_amountt} to 5 if {_e} is iron ore or deepslate iron ore
+    set {_amountt} to 5 if {_e} is gold ore or deepslate gold ore
+    set {_amountt} to 5 if {_e} is emerald ore or deepslate emerald ore
+    set {_amountt} to 5 if {_e} is redstone ore or deepslate redstone ore
+    set {_amountt} to 5 if {_e} is lapis ore or deepslate lapis ore
+    set {_amountt} to 8 if {_e} is diamond ore or deepslate diamond ore
+    set {_amountt} to 4 if {_e} is nether gold ore
+    set {_amountt} to 4 if {_e} is nether quartz ore
+    set {_amountt} to 20 if {_e} is ancient debris
+    add {_amount} to {levels::xp::%{_uuid}%}
+    add {_amountt} to {token::%{_uuid}%}
+    set level progress of {_p} to getXP({_p})/checkRequiredXP({_p})
+    set level of {_p} to getLevel({_p})
+    checkXP({_p})
+    send action bar "&a+%{_amount}% &aXP. &8| &e+&e%{_amountt}% &eTokens." to {_p}
+    stop
+
+# NOTE: FOR THIS TO WORK CORRECTLY, PLEASE ADD COLORS SORTING FROM HIGHEST TO LOWEST LEVEL. TRUST ME, YOU'LL THANK ME LATER.
+function levelColor(l: number) :: text:
+    return "&6" if {_l} >= 50
+    return "&e" if {_l} >= 40
+    return "&b" if {_l} >= 30
+    return "&3" if {_l} >= 20
+    return "&f" if {_l} >= 10
+    return "&7" if {_l} >= 1
+    return "&7" # in case the player's level is fucked and is level 0.
+# NOTE: FOR THIS TO WORK CORRECTLY, PLEASE ADD COLORS SORTING FROM HIGHEST TO LOWEST LEVEL. TRUST ME, YOU'LL THANK ME LATER.
+
+on placeholderapi placeholder request for the prefix "levels":
+    if the identifier is "level":
+        set {_r} to formatNumber(getLevel(player))
+        set the result to "%{_r}%"
+    if the identifier is "levelcolor":
+        set {_r} to levelColor(getLevel(player))
+        set the result to "%{_r}%"
+    if the identifier is "needxp":
+        set {_r} to formatNumber(checkRequiredXP(player) - getXP(player))
+        set the result to "%{_r}%"
+    if the identifier is "xp":
+        set {_r} to formatNumber(getXP(player))
+        set the result to "%{_r}%"
+
+on placeholderapi placeholder request for the prefix "tokens":
+    if the identifier is "token":
+        set {_r} to formatNumber({token::%player's uuid%})
+        set the result to "%{_r}%"
+
+on join:
+    set {levels::level::%player's uuid%} to 1 if {levels::level::%player's uuid%} isn't set
+    set {levels::xp::%player's uuid%} to 0 if {levels::xp::%player's uuid%} isn't set
+
+on quit:
+    delete {levels::level::%player's uuid%} if {levels::level::%player's uuid%} is 1
+    delete {levels::xp::%player's uuid%} if {levels::xp::%player's uuid%} is 0
+
+command /level <offline player=%player%>:
+    trigger:
+        set {_uuid} to arg 1's uuid
+        set {_required} to checkRequiredXP(arg 1)
+        send "&a%arg 1's displayname%&2's &2Level Information:%nl%&2Level: &a%{levels::level::%player's uuid%}%%nl%&2XP: &a%{levels::xp::%player's uuid%}%%nl%&2XP Required: &a%{_required}%" to player
+
+command /level:reset <offline player=%player%>:
+    permission: op
+    trigger:
+        set {levels::level::%arg 1's uuid%} to 1
+        set {levels::xp::%arg 1's uuid%} to 0
+        send "reset levels for %arg 1's displayname%" to sender
+
+command /level:resetall:
+    permission: op
+    trigger:
+        set {levels::level::*} to 1
+        set {levels::xp::*} to 0
+        send "reset levels for all players" to sender
+
+on break:
+    player's tool can break event-block
+    giveET(player, event-block)

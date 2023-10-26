@@ -1,0 +1,96 @@
+options:
+    nopin: &cFor security reasons, you need to get a PIN given to you by an administrator.
+    needpin: &cYou need to login. Please use: /pin <pin>
+
+on connect:
+    player has permission "rank.helper"
+    if {pin::%player's uuid%} isn't set:
+        kick player due to "{@nopin}"
+
+on join:
+    player has permission "rank.helper"
+    add player's uuid to {needpin::*}
+    while player is online:
+        if {needpin::*} contains player's uuid:
+            send "{@needpin}" to sender
+            wait 1 second
+        else if {needpin::*} doesn't contain player's uuid:
+            stop
+
+on chat:
+    player has permission "rank.helper"
+    if {needpin::*} contains player's uuid:
+        cancel event
+
+on command:
+    player has permission "rank.helper"
+    if {needpin::*} contains player's uuid:
+        cancel event
+
+on break:
+    player has permission "rank.helper"
+    if {needpin::*} contains player's uuid:
+        cancel event
+
+on place:
+    player has permission "rank.helper"
+    if {needpin::*} contains player's uuid:
+        cancel event
+
+command /pin:assign <offline player>:
+    permission: rank.admin
+    trigger:
+        if arg 1 is sender:
+            send "&cYou cannot assign your own PIN."
+            stop
+        if {pin::%arg 1's uuid%} is set:
+            send "&c%arg 1% &calready has a pin assigned."
+        if {pin::%arg 1's uuid%} isn't set:
+            set {_p1} to a random integer between 0 and 9
+            set {_p2} to a random integer between 0 and 9
+            set {_p3} to a random integer between 0 and 9
+            set {_p4} to a random integer between 0 and 9
+            set {pin::%arg 1's uuid%} to "%{_p1}%%{_p2}%%{_p3}%%{_p4}%"
+            send "&a%arg 1%&a's pin is: &2%{pin::%arg 1's uuid%}%" to sender
+
+command /pin:delete <offline player>:
+    permission: rank.admin
+    trigger:
+        if arg 1 is sender:
+            send "&cYou cannot delete your own PIN."
+            stop
+        if {pin::%arg 1's uuid%} isn't set:
+            send "&c%arg 1% &cdoesn't have a pin assigned."
+        if {pin::%arg 1's uuid%} is set:
+            delete {pin::%arg 1's uuid%}
+            send "&aDeleted %arg 1%&a's pin."
+
+command /pin:view <offline player>:
+    permission: rank.admin
+    trigger:
+        if {pin::%arg 1's uuid%} isn't set:
+            send "&c%arg 1% &cdoesn't have a pin assigned."
+        if {pin::%arg 1's uuid%} is set:
+            send "&a%arg 1%&a's pin is: &2%{pin::%arg 1's uuid%}%" 
+
+command /pin <integer>:
+    executable by: players
+    permission: rank.helper
+    trigger:
+        if {pin::%player's uuid%} isn't set:
+            send "{@nopin}"
+            stop
+        if {pin::%player's uuid%} is set:
+            if arg 1 is {pin::%player's uuid%} parsed as integer:
+                if {needpin::*} contains player's uuid:
+                    remove player's uuid from {needpin::*}
+                    send "&aLogged in." to sender
+                else:
+                    send "&cAlready logged in." to sender
+                    stop
+            else if arg 1 isn't {pin::%player's uuid%} parsed as integer:
+                if {needpin::*} contains player's uuid:
+                    send "&cWrong pin." to sender
+                else:
+                    send "&cAlready logged in." to sender
+                    stop

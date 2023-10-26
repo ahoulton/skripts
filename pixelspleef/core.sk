@@ -1,0 +1,246 @@
+on placeholderapi placeholder request for the prefix "spleef":
+	if the identifier is "ingame":
+		if {spleef::players::*} or {spleef::spectators::*} contains player:
+			set the result to "true"
+		else if {spleef::players::*} or {spleef::spectators::*} doesn't contain player:
+			set the result to "false"
+	if the identifier is "inqueue":
+		if {spleef::queue::*} contains player:
+			set the result to "true"
+		else if {spleef::queue::*} doesn't contain player:
+			set the result to "false"
+	if the identifier is "amountinqueue":
+		set the result to "%amount of {spleef::queue::*} ? 0%"
+	if the identifier is "amountingame":
+		set the result to "%amount of {spleef::players::*} ? 0%"
+	if the identifier is "wins":
+		set {_uuid} to player's uuid
+		set the result to "%{stats::wins::%{_uuid}%} ? 0%"
+	if the identifier is "deaths":
+		set {_uuid} to player's uuid
+		set the result to "%{stats::deaths::%{_uuid}%} ? 0%"
+	if the identifier is "winstreak":
+		set {_uuid} to player's uuid
+		set the result to "%{stats::winstreak::%{_uuid}%} ? 0%"
+
+on join:
+	clear player's inventory
+	teleport player to {location::spawn}
+	giveQueueItem(player)
+	set join message to "&7&o%player% joined."
+
+on quit:
+	remove player from {spleef::spectators::*} if {spleef::spectators::*} contains player
+	{spleef::started} is true
+	if {spleef::players::*} contains player:
+		set {_uuid} to player's uuid
+		remove player from {spleef::players::*}
+		add 1 to {stats::deaths::%{_uuid}%}
+		set {stats::winstreak::%{_uuid}%} to 0
+		if size of {spleef::players::*} <= 1:
+			endGame()
+
+on walking on bedrock:
+	if {spleef::players::*} contains player:
+		set {_uuid} to player's uuid
+		remove player from {spleef::players::*}
+		add 1 to {stats::deaths::%{_uuid}%}
+		set {stats::winstreak::%{_uuid}%} to 0
+		send "&6%player% &ais out!" to all players
+		if size of {spleef::players::*} <= 1:
+			endGame()
+		extinguish the player
+		set player's gamemode to spectator
+	stop
+
+function giveQueueItem(p: player):
+	if {spleef::queue::*} contains player:
+		set slot 4 of {_p}'s inventory to red dye named "&cLeave Queue"
+		set {_p}'s selected hotbar slot to slot 4 of {_p}
+	else if {spleef::queue::*} doesn't contain player:
+		set slot 4 of {_p}'s inventory to lime dye named "&aJoin Queue"
+		set {_p}'s selected hotbar slot to slot 4 of {_p}
+
+function endGame():
+	clear inventory of all players
+	delete {spleef::allowbreaking}
+	delete {spleef::started}
+	delete {spleef::spectators::*}
+	loop all blocks in region "snow1":
+		set block at loop-value to snow block if block at loop-value isn't snow block
+	loop all blocks in region "snow2":
+		set block at loop-value to snow block if block at loop-value isn't snow block
+	loop all blocks in region "snow3":
+		set block at loop-value to snow block if block at loop-value isn't snow block
+	loop all blocks in region "snow4":
+		set block at loop-value to snow block if block at loop-value isn't snow block
+	teleport all players to {location::spawn}
+	if {spleef::players::*} is set:
+		set {_winner} to first element out of {spleef::players::*}
+		set {_winneruuid} to {_winner}'s uuid
+		add 1 to {stats::wins::%{_winneruuid}%}
+		add 1 to {stats::winstreak::%{_winneruuid}%}
+	else if {spleef::players::*} isn't set:
+		set {_winner} to "no one"
+	delete {spleef::players::*}
+	send "&6%{_winner}% &awon!" to all players
+	wait 0.5 second
+	loop all players:
+		if loop-player's gamemode is survival or spectator:
+			set gamemode of loop-player to adventure
+		if {spleef::dontautoqueue::*} doesn't contain loop-player's uuid:
+			make loop-player execute command "/queue"
+		giveQueueItem(loop-player) if {spleef::autoqueue::*} doesn't contain loop-player's uuid
+
+function startGame():
+	add {spleef::queue::*} to {spleef::players::*}
+	remove {spleef::players::*} from {spleef::queue::*}
+	set {spleef::started} to true
+	clear inventory of {spleef::players::*}
+	set gamemode of {spleef::players::*} to survival
+	teleport {spleef::players::*} to {location::startpoint}
+	loop all players:
+		{spleef::players::*} contains loop-player
+		set {_shovel} to unbreakable diamond shovel named "&bShovel"
+		enchant {_shovel} with efficiency 5
+		give {_shovel} to loop-player
+		set loop-player's selected hotbar slot to slot 0 of loop-player
+	send title "&aGame will start" with subtitle "&ain 5 seconds!" to {spleef::players::*}
+	wait 1 second
+	send title "&aGame will start" with subtitle "&ain 4 seconds!" to {spleef::players::*}
+	wait 1 second
+	send title "&aGame will start" with subtitle "&ain 3 seconds!" to {spleef::players::*}
+	wait 1 second
+	send title "&aGame will start" with subtitle "&ain 2 seconds!" to {spleef::players::*}
+	wait 1 second
+	send title "&aGame will start" with subtitle "&ain a second!" to {spleef::players::*}
+	wait 1 second
+	set {spleef::allowbreaking} to true
+	send title "&aThe game has started." with subtitle "&7Get other players out by getting them in lava!" to {spleef::players::*}
+
+function prepareGame():
+	stop if checkQueueStatus() is false
+	stop if {spleef::queuetimer::started} is set
+	stop if {spleef::started} is set
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		set {spleef::queuetimer::started} to true
+		send "&aPlayers will be teleported in 5 seconds." to all players
+		wait 1 second
+	stop if checkQueueStatus() is false
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started} 
+		stop
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		send "&aPlayers will be teleported in 4 seconds." to all players
+		wait 1 second
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started} 
+		stop
+	stop if checkQueueStatus() is false
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		send "&aPlayers will be teleported in 3 seconds." to all players
+		wait 1 second
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started} 
+		stop
+	stop if checkQueueStatus() is false
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		send "&aPlayers will be teleported in 2 seconds." to all players
+		wait 1 second
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started} 
+		stop
+	stop if checkQueueStatus() is false
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		send "&aPlayers will be teleported in a second." to all players
+		wait 1 second
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started} 
+		stop
+	stop if checkQueueStatus() is false
+	if size of {spleef::queue::*} >= {spleef::minimumqueue}:
+		startGame()
+		delete {spleef::queuetimer::started}
+	if size of {spleef::queue::*} < {spleef::minimumqueue}:
+		send "&cTimer stopped due to lack of players in queue." to all players if {spleef::queuetimer::started} is set
+		delete {spleef::queuetimer::started}
+		stop
+	stop if checkQueueStatus() is false
+
+function checkQueueStatus() :: boolean:
+	if {spleef::queuedisabled} is set:
+		return false
+	else if {spleef::queuedisabled} isn't set:
+		return true
+
+on right click:
+	make player execute command "/queue" if event-item is lime dye or red dye
+
+command /spectate:
+	trigger:
+		if {spleef::started} is true:
+			if {spleef::players::*} contains player:
+				send "&cYou are playing, therefore you cannot spectate." to player
+				stop
+			add player to {spleef::spectators::*} if {spleef::spectators::*} doesn't contain player
+			set player's gamemode to spectator
+			teleport player to {location::startpoint}
+		else if {spleef::started} isn't set:
+			send "&cThe game isn't started yet!" to player
+
+command /autoqueue:
+	trigger:
+		if {spleef::dontautoqueue::*} doesn't contain player's uuid:
+			add player's uuid to {spleef::dontautoqueue::*}
+			send "&cAutoqueue disabled. &7&oYou'll won't be queued once the game finished." to player
+		else if {spleef::dontautoqueue::*} contains player's uuid:
+			remove player's uuid from {spleef::dontautoqueue::*}
+			send "&aAutoqueue enabled. &7&oYou'll be queued once the game finished." to player
+
+command /queue:
+	trigger:
+		if difference between {spleef::queue::lastran::%player's uuid%} and now < 1 second:
+			send action bar "&cPlease wait atleast 1 second before joining/leaving queue." to player
+			stop
+		set {spleef::queue::lastran::%player's uuid%} to now
+		if {spleef::players::*} contains player:
+			send "&cYou are already playing."
+			stop
+		if {spleef::queue::*} doesn't contain player:
+			set slot 4 of player's inventory to red dye named "&cLeave Queue"
+			add player to {spleef::queue::*}
+			send action bar "&aYou have joined the queue." to player
+			prepareGame()
+		else if {spleef::queue::*} contains player:
+			set slot 4 of player's inventory to lime dye named "&aJoin Queue"
+			remove player from {spleef::queue::*}
+			send action bar "&cYou have left the queue." to player
+
+command /spleef:setminimumqueue <integer>:
+	permission: op
+	trigger:
+		set {spleef::minimumqueue} to arg-1
+		send "&aChanged minimum queue requirement to: %{spleef::minimumqueue}%" to sender
+
+command /spleef:makesnowregion <integer>:
+	permission: op
+	trigger:
+		make player execute command "/rg define snow%arg-1%"
+		make player execute command "/rg flag snow%arg-1% build allow"
+		make player execute command "/rg flag snow%arg-1% block-break allow"
+		make player execute command "/rg flag snow%arg-1% block-place deny"
+
+command /spleef:togglequeue:
+	permission: op
+	trigger:
+		if {spleef::queuedisabled} isn't set:
+			set {spleef::queuedisabled} to true
+			send "&cQueue has been disabled by an administrator." to all players
+		else if {spleef::queuedisabled} is set:
+			delete {spleef::queuedisabled}
+			send "&aQueue has been enabled by an administrator." to all players

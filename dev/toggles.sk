@@ -1,0 +1,72 @@
+on join:
+    event isn't cancelled
+    set {break::%player's uuid%} to true if {break::%player's uuid%} isn't set
+    set {damage::%player's uuid%} to true if {damage::%player's uuid%} isn't set
+    set {drop::%player's uuid%} to true if {drop::%player's uuid%} isn't set
+    set {place::%player's uuid%} to true if {place::%player's uuid%} isn't set
+    set {pickup::%player's uuid%} to true if {pickup::%player's uuid%} isn't set
+    
+on break:
+    cancel event if {break::%player's uuid%} is false
+
+on damage:
+    cancel event if {damage.%victim's uuid%} is false
+
+on drop:
+    cancel event if {drop::%player's uuid%} is false
+
+on place:
+    cancel event if {place::%player's uuid%} is false
+
+on pickup:
+    cancel event if {pickup::%player's uuid%} is false
+
+command /togglebreak:
+    aliases: /break
+    trigger:
+        if {break::%player's uuid%} isn't false:
+            set {break::%player's uuid%} to false
+            send "&cYou have disabled breaking blocks." to sender
+        else:
+            set {break::%player's uuid%} to true
+            send "&aYou have enabled breaking blocks." to sender
+
+command /toggledamage:
+    aliases: /damage
+    trigger:
+        if {damage::%player's uuid%} isn't false:
+            set {damage::%player's uuid%} to false
+            send "&cYou will no longer take damage." to sender
+        else:
+            set {damage::%player's uuid%} to true
+            send "&aYou will now take damage." to sender
+
+command /toggledrop:
+    aliases: /drop
+    trigger:
+        if {drop::%player's uuid%} isn't false:
+            set {drop::%player's uuid%} to false
+            send "&cYou have disabled dropping items." to sender
+        else:
+            set {drop::%player's uuid%} to true
+            send "&aYou have enabled dropping items." to sender
+
+command /toggleplace:
+    aliases: /place
+    trigger:
+        if {place::%player's uuid%} isn't false:
+            set {place::%player's uuid%} to false
+            send "&cYou have disabled placing blocks." to sender
+        else:
+            set {place::%player's uuid%} to true
+            send "&aYou have enabled placing blocks." to sender
+
+command /togglepickup:
+    aliases: /pickup
+    trigger:
+        if {pickup::%player's uuid%} isn't false:
+            set {pickup::%player's uuid%} to false
+            send "&cYou have disabled picking up items." to sender
+        else:
+            set {pickup::%player's uuid%} to true
+            send "&aYou have enabled picking up items." to sender

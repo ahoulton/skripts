@@ -1,0 +1,33 @@
+on load:
+	set {trackstats::player} to true if {trackstats::player} isn't set
+
+on join:
+	add player's uuid to {totaljoins::*} if {totaljoins::*} doesn't contain player's uuid
+	set {stats::%player's uuid%::kills} to 0 if {stats::%player's uuid%::kills} isn't set
+	set {stats::%player's uuid%::deaths} to 0 if {stats::%player's uuid%::deaths} isn't set
+
+on death:
+	if {trackstats::player} is false:
+		stop
+	attacker is a player
+	victim is a player
+	attacker isn't victim
+	add 1 to {stats::%attacker's uuid%::kills}
+	add 1 to {stats::%victim's uuid%::deaths}
+
+command /stats:reset <offline player>:
+	permission: op
+	trigger:
+		set {stats::%arg 1's uuid%::kills} to 0
+		set {stats::%arg 1's uuid%::deaths} to 0
+		send "cleared stats for %arg 1%"
+		
+command /stats:toggle:
+	permission: op
+	trigger:
+		if {trackstats::player} is false:
+			set {trackstats::player} to true
+		else if {trackstats::player} is true:
+			set {trackstats::player} to false
+		send "&aEnabled player stats." to sender if {trackstats::player} is true
+		send "&cDisabled player stats." to sender if {trackstats::player} is false

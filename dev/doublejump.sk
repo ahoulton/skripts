@@ -1,0 +1,59 @@
+on load:
+    set {doublejump::settings::forward} to 0.8
+    set {doublejump::settings::upward} to 0.8
+
+on join:
+    set {doublejump::%player's uuid%} to false if {doublejump::%player's uuid%} isn't set
+
+on flight toggle:
+    if player's gamemode isn't creative or spectator:
+        {doublejump::%player's uuid%} is true
+        cancel event
+        wait a tick
+        set player's flight state to false
+        set {_forward} to {doublejump::settings::forward}
+        set {_upwards} to {doublejump::settings::upward}
+        push player upwards at speed {_upwards}
+        push player forward at speed {_forward}
+
+on damage:
+    {doublejump::%victim's uuid%} is true
+    cancel event
+
+on jump:
+    {doublejump::%player's uuid%} is true
+    player's gamemode is not creative:
+        block below player is not air or water:
+            set player's flight state to true
+
+command doublejump:
+    aliases: /dj
+    executable by: players
+    trigger:
+        if {doublejump::%player's uuid%} is false:
+            set {doublejump::%player's uuid%} to true
+            send "&aDoubleJump is enabled." to sender
+        else if {doublejump::%player's uuid%} is true:
+            set {doublejump::%player's uuid%} to false
+            send "&cDoubleJump is disabled." to player
+
+command djconfig <text> [<number>]:
+    permission: op
+    usage: &c/djconfig <upward/forward/reset> [<number>]
+    trigger:
+        if arg 1 = "forward":
+            if arg 2 isn't set:
+                send "&aCurrent forward speed is %{doublejump::settings::forward}%&a."
+            else:
+                set {doublejump::settings::forward} to arg 2
+                send "&aChanged forward speed to %arg 2%&a."
+        if arg 1 = "upward":
+            if arg 2 isn't set:
+                send "&aCurrent upward speed is %{doublejump::settings::upward}%&a."
+            else:
+                set {doublejump::settings::upward} to arg 2
+                send "&aChanged upward speed to %arg 2%&a."
+        if arg 1 = "reset":
+            set {doublejump::settings::forward} to 0.8
+            set {doublejump::settings::upward} to 0.8
+            send "&aResetted variables."

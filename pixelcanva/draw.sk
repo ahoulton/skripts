@@ -1,0 +1,233 @@
+options:
+    deleteblockdataname: "&cDelete Block Data"
+    deleteblockdatalore: "&7Left/Right Click:%nl%&fDelete Target Block Data."
+    checkblockname: "&dCheck Block"
+    checkblocklore: "&7Left/Right Click:%nl%&fCheck Target Block Data."
+    drawname: "&bDraw"
+    drawlore: "&7Left Click: &fDraw!%nl%&7Right Click: &fSet Block."
+    defaultcooldown: 1 second
+    reducedcooldown: 0.5 second
+
+on placeholderapi placeholder request for the prefix "draw":
+    if the identifier is "oncooldown":
+        if {draw::bypasscooldown::*} contains player's uuid:
+            set {_cd} to "&cBypassing."
+            set the result to {_cd}
+            stop
+        if {draw::%player's uuid%::lastdraw} isn't set:
+            set {_cd} to "&cDATA NOT FOUND."
+            set the result to {_cd}
+            stop
+        set {_rcd} to {@reducedcooldown} if player has permission "draw.reducedcooldown"
+        set {_rcd} to {@defaultcooldown} if player doesn't have permission "draw.reducedcooldown"
+        set {_cd} to "&cOn cooldown." if difference between {draw::%player's uuid%::lastdraw} and now <= {_rcd}
+        set {_cd} to "&aNot on cooldown." if difference between {draw::%player's uuid%::lastdraw} and now >= {_rcd}
+        set the result to {_cd}
+
+function giveItems(p: player):
+    if {_p}'s gamemode is adventure or survival:
+        clear {_p}'s inventory
+        set slot 0 of {_p} to blaze rod named {@drawname} with lore {@drawlore}
+        set slot 1 of {_p} to book named {@checkblockname} with lore {@checkblocklore}
+        set slot 2 of {_p} to enchanted book named {@deleteblockdataname} with lore {@deleteblockdatalore} if {_p} has permission "draw.deleteblockdata"
+    if {_p}'s gamemode is creative:
+        clear {_p}'s inventory
+        set slot 0 of {_p} to book named {@checkblockname} with lore {@checkblocklore}
+        set slot 1 of {_p} to enchanted book named {@deleteblockdataname} with lore {@deleteblockdatalore} if {_p} has permission "draw.deleteblockdata"
+        set slot 2 of {_p} to wooden axe named "&dWorldEdit Wand" if {_p} has permission "worldedit.wand"
+
+on first join:
+    set {draw::%player's uuid%::blocktype} to "wool" if {draw::%player's uuid%::blocktype} isn't set
+    remove player's uuid from {draw::canbuild::*} if {draw::canbuild::*} contains player's uuid
+    giveItems(player)
+
+on gamemode change:
+    wait 0.1 second
+    giveItems(player)
+
+# basic drawing functionality
+function openDrawGUI(p: player):
+    set {_uuid} to {_p}'s uuid
+    set metadata tag "draw-gui" of {_p} to chest inventory with 4 rows named "&bSelect a block!"
+    updateDrawGUI({_p}, "concrete") if {draw::%{_uuid}%::blocktype} isn't set
+    updateDrawGUI({_p}, "concrete") if {draw::%{_uuid}%::blocktype} is "concrete"
+    updateDrawGUI({_p}, "concretepowder") if {draw::%{_uuid}%::blocktype} is "concretepowder"
+    updateDrawGUI({_p}, "wool") if {draw::%{_uuid}%::blocktype} is "wool"
+    set slot 30 of metadata tag "draw-gui" of {_p} to lime concrete named "&aToggle Concrete"
+    set slot 31 of metadata tag "draw-gui" of {_p} to lime concrete powder named "&aToggle Concrete Powder"
+    set slot 32 of metadata tag "draw-gui" of {_p} to lime wool named "&aToggle Wool"
+    open (metadata tag "draw-gui" of {_p}) to {_p}
+
+function updateDrawGUI(p: player, t: text):
+    set {_s} to 18
+    loop 9 times:
+        set slot {_s} of metadata tag "draw-gui" of {_p} to black stained glass pane named "&7placeholder pls ignore"
+        add 1 to {_s}
+    if {_t} is "concrete":
+        set slot 0 of metadata tag "draw-gui" of {_p} to black concrete
+        set slot 1 of metadata tag "draw-gui" of {_p} to blue concrete
+        set slot 2 of metadata tag "draw-gui" of {_p} to brown concrete
+        set slot 3 of metadata tag "draw-gui" of {_p} to cyan concrete
+        set slot 4 of metadata tag "draw-gui" of {_p} to gray concrete
+        set slot 5 of metadata tag "draw-gui" of {_p} to green concrete
+        set slot 6 of metadata tag "draw-gui" of {_p} to light blue concrete
+        set slot 7 of metadata tag "draw-gui" of {_p} to light gray concrete
+        set slot 8 of metadata tag "draw-gui" of {_p} to lime concrete
+        set slot 9 of metadata tag "draw-gui" of {_p} to magenta concrete
+        set slot 10 of metadata tag "draw-gui" of {_p} to orange concrete
+        set slot 11 of metadata tag "draw-gui" of {_p} to purple concrete
+        set slot 12 of metadata tag "draw-gui" of {_p} to pink concrete
+        set slot 13 of metadata tag "draw-gui" of {_p} to red concrete
+        set slot 14 of metadata tag "draw-gui" of {_p} to yellow concrete
+        set slot 15 of metadata tag "draw-gui" of {_p} to white concrete
+    if {_t} is "concretepowder":
+        set slot 0 of metadata tag "draw-gui" of {_p} to black concrete powder
+        set slot 1 of metadata tag "draw-gui" of {_p} to blue concrete powder
+        set slot 2 of metadata tag "draw-gui" of {_p} to brown concrete powder
+        set slot 3 of metadata tag "draw-gui" of {_p} to cyan concrete powder
+        set slot 4 of metadata tag "draw-gui" of {_p} to gray concrete powder
+        set slot 5 of metadata tag "draw-gui" of {_p} to green concrete powder
+        set slot 6 of metadata tag "draw-gui" of {_p} to light blue concrete powder
+        set slot 7 of metadata tag "draw-gui" of {_p} to light gray concrete powder
+        set slot 8 of metadata tag "draw-gui" of {_p} to lime concrete powder
+        set slot 9 of metadata tag "draw-gui" of {_p} to magenta concrete powder
+        set slot 10 of metadata tag "draw-gui" of {_p} to orange concrete powder
+        set slot 11 of metadata tag "draw-gui" of {_p} to purple concrete powder
+        set slot 12 of metadata tag "draw-gui" of {_p} to pink concrete powder
+        set slot 13 of metadata tag "draw-gui" of {_p} to red concrete powder
+        set slot 14 of metadata tag "draw-gui" of {_p} to yellow concrete powder
+        set slot 15 of metadata tag "draw-gui" of {_p} to white concrete powder
+    if {_t} is "wool":
+        set slot 0 of metadata tag "draw-gui" of {_p} to black wool
+        set slot 1 of metadata tag "draw-gui" of {_p} to blue wool
+        set slot 2 of metadata tag "draw-gui" of {_p} to brown wool
+        set slot 3 of metadata tag "draw-gui" of {_p} to cyan wool
+        set slot 4 of metadata tag "draw-gui" of {_p} to gray wool
+        set slot 5 of metadata tag "draw-gui" of {_p} to green wool
+        set slot 6 of metadata tag "draw-gui" of {_p} to light blue wool
+        set slot 7 of metadata tag "draw-gui" of {_p} to light gray wool
+        set slot 8 of metadata tag "draw-gui" of {_p} to lime wool
+        set slot 9 of metadata tag "draw-gui" of {_p} to magenta wool
+        set slot 10 of metadata tag "draw-gui" of {_p} to orange wool
+        set slot 11 of metadata tag "draw-gui" of {_p} to purple wool
+        set slot 12 of metadata tag "draw-gui" of {_p} to pink wool
+        set slot 13 of metadata tag "draw-gui" of {_p} to red wool
+        set slot 14 of metadata tag "draw-gui" of {_p} to yellow wool
+        set slot 15 of metadata tag "draw-gui" of {_p} to white wool
+
+on inventory click:
+    if event-inventory = (metadata tag "draw-gui" of player):
+        if event-slot is any wool, any concrete or any concrete powder:
+            if index of event-slot is 30, 31 or 32:
+                if event-slot is any wool:
+                    if {draw::%player's uuid%::blocktype} is "wool":
+                        cancel event
+                        stop
+                    set {draw::%player's uuid%::blocktype} to "wool"
+                    updateDrawGUI(player, "wool")
+                if event-slot is any concrete:
+                    if {draw::%player's uuid%::blocktype} is "concrete":
+                        cancel event
+                        stop
+                    set {draw::%player's uuid%::blocktype} to "concrete"
+                    updateDrawGUI(player, "concrete")
+                if event-slot is any concrete powder:
+                    if {draw::%player's uuid%::blocktype} is "concretepowder":
+                        cancel event
+                        stop
+                    set {draw::%player's uuid%::blocktype} to "concretepowder"
+                    updateDrawGUI(player, "concretepowder")
+                cancel event
+                stop
+            if {draw::%player's uuid%::block} is event-slot:
+                send "&cBlock is already: &f%{draw::%player's uuid%::block}%" to player
+                close player's inventory
+                stop
+            set {draw::%player's uuid%::block} to event-slot
+            send "&aChanged block to: &f%{draw::%player's uuid%::block}%" to player
+            close player's inventory
+        cancel event
+
+on left click with blaze rod:
+    event-item's name is {@drawname}
+    if player's target block is any wool, any concrete or any concrete powder:
+        set {_b} to white wool if {draw::%player's uuid%::block} isn't set
+        set {_b} to {draw::%player's uuid%::block} if {draw::%player's uuid%::block} is set
+        set {_cd} to {@reducedcooldown} if player has permission "draw.reducedcooldown"
+        set {_cd} to {@defaultcooldown} if player doesn't have permission "draw.reducedcooldown"
+        if player's target block is {_b}:
+            send action bar "&cThis won't count to your cooldown due to it being the same block as your selected block." to player
+            stop
+        if difference between {draw::%player's uuid%::lastdraw} and now <= {_cd}:
+            {draw::bypasscooldown::*} doesn't contain player's uuid
+            send action bar "&cYou are still on cooldown for: %{_cd}%" to player
+            stop
+        set {draw::%player's uuid%::lastdraw} to now
+        set {_nbt} to nbt compound of player's target block
+        set tag "drawer" of {_nbt} to player's uuid
+        set player's targeted block to {_b}
+
+on right click with blaze rod:
+    event-item's name is {@drawname}
+    openDrawGUI(player)
+# basic drawing functionality
+
+on click with book:
+    event-item's name is {@checkblockname}
+    if player's target block isn't any wool, any concrete or any concrete powder:
+        stop
+    if player's target block isn't set:
+        stop
+    set {_nbt} to nbt compound of player's target block
+    if tag "drawer" of {_nbt} is set:
+        set {_xc} to x coord of player's target block
+        set {_yc} to y coord of player's target block
+        set {_zc} to z coord of player's target block
+        set {_id} to tag "drawer" of {_nbt}
+        set {_idtoname} to ({_id} parsed as offline player)
+        send "&aDrawed by: &f%{_idtoname}% &8[&eX: %{_xc}%&7, &eY: %{_yc}%&7, &eZ: %{_zc}%&8]" to player
+    else if tag "drawer" of {_nbt} isn't set:
+        send "&cNo one has drawed on this block yet." to player
+
+on click with enchanted book:
+    event-item's name is {@deleteblockdataname}
+    if player doesn't have permission "draw.deleteblockdata":
+        send "&cYou cannot delete block data. Contact Houlton if you suspect you got this in error." to player
+        stop
+    if player's target block isn't any wool, any concrete or any concrete powder:
+        stop
+    if player's target block isn't set:
+        stop
+    set {_nbt} to nbt compound of player's target block
+    if tag "drawer" of {_nbt} is set:
+        delete tag "drawer" of {_nbt}
+        set {_xc} to x coord of player's target block
+        set {_yc} to y coord of player's target block
+        set {_zc} to z coord of player's target block
+        set player's target block to white wool
+        send "&aDeleted block data at &eX: %{_xc}%&7, &eY: %{_yc}%&7, &eZ: %{_zc}%&a." to player
+    else if tag "drawer" of {_nbt} isn't set:
+        send "&cThis block has no data." to player
+
+command /draw:bypasscooldown:
+    executable by: players
+    permission: draw.bypasscooldown
+    permission message: &cNo permission.
+    trigger:
+        if {draw::bypasscooldown::*} doesn't contain player's uuid:
+            add player's uuid to {draw::bypasscooldown::*}
+            send "&aBypass enabled." to player
+        else if {draw::bypasscooldown::*} contains player's uuid:
+            remove player's uuid from {draw::bypasscooldown::*}
+            send "&cBypass disabled." to player
+
+command /draw:build:
+    executable by: players
+    permission: draw.build
+    trigger:
+        if {draw::canbuild::*} doesn't contain player's uuid:
+            add player's uuid to {draw::canbuild::*}
+            send "&aYou can now build." to player
+        else if {draw::canbuild::*} contains player's uuid:
+            remove player's uuid from {draw::canbuild::*}
+            send "&cYou can no longer build." to player

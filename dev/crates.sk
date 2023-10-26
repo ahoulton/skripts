@@ -1,0 +1,56 @@
+options:
+    prefix: &7[&bCRATES&7]
+
+on load:
+    set {crates::common::name} to "&a&lCommon Key"
+    set {crates::uncommon::name} to "&b&lUncommon Key"
+
+function getCrateAwards(p: player, t: text):
+    if {_t} is "common":
+        set {_c} to a random integer between 1 and 100
+        if {_c} is between 1 and 50:
+            give {_p} 1 coal block
+            send "{@prefix} &aYou have been awarded a Coal Block." to {_p}
+            remove 1 tripwire hook named {crates::common::name} from {_p}
+        if {_c} is between 50 and 100:
+            give {_p} 1 iron block
+            send "{@prefix} &aYou have been awarded a Iron Block." to {_p}
+            remove 1 tripwire hook named {crates::common::name} from {_p}
+        if {_c} is 100:
+            give {_p} 1 tripwire hook named {crates::uncommon::name}
+            send "{@prefix} &aYou are been awarded a %{crates::uncommon::name}%&a." to {_p}
+    if {_t} is "uncommon":
+        set {_c} to a random integer between 1 and 100
+        if {_c} is between 1 and 50:
+            give {_p} 1 gold block
+            send "{@prefix} &aYou have been awarded a Gold Block." to {_p}
+            remove 1 tripwire hook named {crates::uncommon::name} from {_p}
+        if {_c} is between 50 and 100:
+            give {_p} 1 diamond block
+            send "{@prefix} &aYou have been awarded a Diamond Block." to {_p}
+            remove 1 tripwire hook named {crates::uncommon::name} from {_p}
+
+on right click:
+    event-block is a ender chest
+    if event-item is a tripwire hook named {crates::common::name}:
+        cancel event
+        getCrateAwards(player, "common")
+    if event-item is a tripwire hook named {crates::uncommon::name}:
+        cancel event
+        getCrateAwards(player, "uncommon")
+ 
+command givecrate <player = %player%> <text>:
+    permission: op
+    usage: &c/givecrate <player> <type: common>
+    trigger:
+        if arg 2 = "common":
+            set {_player} to arg 1
+            set {_amount} to arg 2
+            give {_player} tripwire hook named {crates::common::name}
+            send "{@prefix} &aGiven you 1 %{crates::common::name}%&a." to arg 1
+        else if arg 2 = "uncommon":
+            set {_player} to arg 1
+            give {_player} tripwire hook named {crates::uncommon::name}
+            send "{@prefix} &aGiven you 1 %{crates::uncommon::name}%&a." to arg 1
+        else:
+            send "{@prefix} &cInvaild subcommand."

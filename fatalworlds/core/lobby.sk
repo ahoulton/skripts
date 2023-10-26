@@ -1,0 +1,32 @@
+on damage:
+	victim's world is "lobby"
+	cancel event
+
+on player world change:
+	world is "lobby"
+	set player's flight mode to true
+
+on swap hand items:
+	player's world is "lobby"
+	cancel event
+
+on break:
+	player's world is "lobby"
+	cancel event
+
+on place:
+	player's world is "lobby"
+	cancel event
+
+on join:
+	set the join message to ""
+	player's world is "lobby"
+	send "&7&o%player% &7&ohas joined your lobby." to all players in world "lobby"
+	set slot 4 of player to clock named "&aWorld Selector" with lore "&7Where we going?"
+	set player's selected hotbar slot to slot 4 of player
+	set player's gamemode to adventure
+	wait 1 tick
+	set player's flight mode to true
+
+on quit:
+	set the quit message to ""

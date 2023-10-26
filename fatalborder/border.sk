@@ -1,0 +1,67 @@
+function killPig():
+    loop all entities:
+        loop-entity is pig
+        loop-entity's name is "&b&lWorld Border"
+        set {killingentity} to true
+        kill loop-entity
+        set {killingentity} to false
+
+on load:
+    set {killingentity} to false if {killingentity} isn't set
+    loop all entities:
+        loop-entity is pig
+        loop-entity's name is "&b&lWorld Border"
+        set the centre of loop-entity's world's world border to event-entity's location
+        set {rtptp} to loop-entity's location
+
+on entity move:
+    event-entity is pig
+    event-entity's name is "&b&lWorld Border"
+    set the centre of event-entity's world's world border to event-entity's location
+    set {rtptp} to event-entity's location
+
+on right click:
+    event-entity is pig
+    event-entity's name is "&b&lWorld Border"
+    cancel event
+
+on death:
+    victim is pig
+    victim's name is "&b&lWorld Border"
+    cancel event if {killingentity} is false
+
+on damage:
+    if victim's location is not inside the world border:
+        #send "%player% is outside of border." to all players where [input has permission "op"]
+        teleport victim to {rtptp}
+        send title "&8- &c&lFATALNESS &r&8-" with subtitle "&aYou were respawned due to being outside of the world border." to victim
+        wait 1 tick
+        set victim's health to 10
+        stop
+
+on respawn:
+    wait 1 tick
+    heal player
+    teleport player to {rtptp}
+
+command /pig:
+    permission: rank.admin
+    executable by: players
+    trigger:
+        killPig()
+        spawn pig at location of player 
+        set name of last spawned entity to "&b&lWorld Border"
+        apply glowing to last spawned entity for 999 days
+        apply potion of slowness of tier 1 to last spawned entity for 999 days
+        send "&c&lFATALNESS &r&7| &aThe pig has been respawned by an administrator." to all players
+
+command /tppig:
+    permission: rank.admin
+    executable by: players
+    trigger:
+        set {_x} to x-position of {rtptp} if {rtptp} is set
+        set {_y} to y-position of {rtptp} if {rtptp} is set
+        set {_z} to z-position of {rtptp} if {rtptp} is set
+        teleport player to location at {_x}, {_y}, {_z} in world "world" if {rtptp} is set
+        send "&aTeleported to pig." to sender if {rtptp} is set
+        send "&cPig isn't known." if {rtptp} isn't set

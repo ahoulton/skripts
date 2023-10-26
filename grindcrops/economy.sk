@@ -1,0 +1,31 @@
+options:
+  haybale: 80
+  wheat: 0.25
+
+on placeholderapi placeholder request for the prefix "economy":
+  if the identifier is "balance":
+    set the result to "&a$%format({data::%player's uuid%::balance})%"
+
+command /balance:
+  executable by: players
+  aliases: /bal
+  trigger:
+    send "&aBalance: &f$%format({data::%player's uuid%::balance})%"
+
+command /sell:
+  executable by: players
+  trigger:
+    if player's inventory contains hay bale:
+      set {_haybale} to amount of hay bale in player's inventory
+      remove 9999 hay bale from player's inventory
+      add {_haybale}*{@haybale} to {data::%player's uuid%::balance}
+      add {_haybale}*{@haybale} to {_total}
+    if player's inventory contains wheat:
+      set {_wheat} to amount of wheat in player's inventory
+      remove 9999 wheat from player's inventory
+      add {_wheat}*{@wheat} to {data::%player's uuid%::balance}
+      add {_wheat}*{@wheat} to {_total}
+    else:
+      send action bar "&cNo vaild items to sell." to sender
+      stop
+    send action bar "&aSold for: &f$%{_total}%" to sender

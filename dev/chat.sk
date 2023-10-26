@@ -1,0 +1,74 @@
+options:
+    acprefix: &c[A]
+    scprefix: &e[S]
+
+on chat:
+    if {adminchat::*} contains sender's uuid:
+        cancel event
+        make player execute command "/ac %message%"
+    if {staffchat::*} contains sender's uuid:
+        cancel event
+        make player execute command "/sc %message%"
+    if {staffchat::*} or {adminchat::*} doesn't contain sender's uuid:
+        set chat format to "%player's prefix%%player%%player's suffix%&7: &f%message%"
+
+command /chat <text>:
+    usage: &c/chat <admin/global/staff>
+    trigger:
+        if arg-1 is "admin":
+            make player execute command "/ac"
+        if arg-1 is "global":
+            make player execute command "/gc"
+        if arg-1 is "staff":
+            make player execute command "/sc"
+
+command /ac [<text>]:
+    permission: chat.admin
+    usage: &c/ac <message>
+    trigger:
+        if arg-1 isn't set:
+            if {staffchat::*} contains sender's uuid:
+                remove sender's uuid from {staffchat::*}
+                add player's uuid to {adminchat::*}
+                send "&cYou were automatically removed from staff chat, all your messages will now go to admin chat."
+                stop
+            if {adminchat::*} contains sender's uuid:
+                remove sender's uuid from {adminchat::*}
+                send "&cYou have disabled admin chat, all messages will go to public chat."
+                stop
+            if {adminchat::*} doesn't contain sender's uuid:
+                add sender's uuid to {adminchat::*}
+                send "&aYou have enabled admin chat, all messages will not be sent to public chat."
+                stop
+        else if arg-1 is set:
+            send "{@acprefix} &f%player's prefix%%player%&7: &f%arg 1%" to all players where [input has permission "chat.admin"]
+
+command /gc:
+    trigger:
+        if {adminchat::*} or {staffchat::*} contains sender's uuid:
+            remove sender's uuid from {adminchat::*}
+            remove sender's uuid from {staffchat::*}
+            send "&aYou are now typing in global chat."
+            stop
+        send "&cYou are already typing in global chat!"
+
+command /sc [<text>]:
+    permission: chat.staff
+    usage: &c/sc <message>
+    trigger:
+        if arg-1 isn't set:
+            if {adminchat::*} contains sender's uuid:
+                remove sender's uuid from {adminchat::*}
+                add sender's uuid to {staffchat::*}
+                send "&cYou were automatically removed from admin chat, all your messages will now go to staff chat."
+                stop
+            if {staffchat::*} contains sender's uuid:
+                remove sender's uuid from {staffchat::*}
+                send "&cYou have disabled staff chat, all messages will go to public chat."
+                stop
+            if {staffchat::*} doesn't contain sender's uuid:
+                add sender's uuid to {staffchat::*}
+                send "&aYou have enabled staff chat, all messages will not be sent to public chat."
+                stop
+        else if arg-1 is set:
+            send "{@scprefix} &f%player's prefix%%player%&7: &f%arg 1%" to all players where [input has permission "chat.staff"]

@@ -1,0 +1,12 @@
+on join:
+    set join message to "%player% joined."
+
+on quit:
+    set quit message to "%player% left."
+
+on chat:
+    if message starts with "\":
+        cancel event
+        set {_cmd} to message
+        replace all "\" with "" in {_cmd}
+        make player execute command "%{_cmd}%"

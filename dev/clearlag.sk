@@ -1,0 +1,67 @@
+# if the clearlag argument is false, it will countdown however setting the clearlag argument to true will just insta clearlag without countdown.
+
+function untammedEntities() :: entities:
+    loop all entities:
+        if loop-entity's owner is not set:
+            broadcast "%loop-entity% - untammed"
+            add loop-entity to {_e::*}
+    return {_e::*}
+
+function tammedEntities() :: entities:
+    loop all entities:
+        if loop-entity's owner is set:
+            broadcast "%loop-entity's owner% - tammed"
+            add loop-entity to {_e::*}
+    return {_e::*}
+
+function clear(e: entities):
+    loop {_e::*}:
+        if loop-value's owner is not set:
+            kill loop-value
+
+function ClearLag(c: boolean):
+    set {clearinglag} to now
+    send "&c&lWARNING &r&8- &cClearing all entities in 10 seconds." to all players if {_c} is true
+    wait 5 seconds if {_c} is true
+    send "&c&lWARNING &r&8- &cClearing all entities in &c&l5 &r&cseconds." to all players if {_c} is true
+    wait 1 second if {_c} is true
+    send "&c&lWARNING &r&8- &cClearing all entities in &c&l4 &r&cseconds." to all players if {_c} is true
+    wait 1 second if {_c} is true
+    send "&c&lWARNING &r&8- &cClearing all entities in &c&l3 &r&cseconds." to all players if {_c} is true
+    wait 1 second if {_c} is true
+    send "&c&lWARNING &r&8- &cClearing all entities in &c&l2 &r&cseconds." to all players if {_c} is true
+    wait 1 second if {_c} is true
+    send "&c&lWARNING &r&8- &cClearing all entities in &c&l1 &r&cseconds." to all players if {_c} is true
+    wait 1 second if {_c} is true
+    execute console command "gamerule doMobLoot false"
+    execute console command "gamerule doMobSpawning false"
+    wait 1 tick
+    untammedEntities()
+    tammedEntities()
+    clear(untammedEntities() where [input is not a player or item frame])
+    wait 1 tick
+    execute console command "gamerule doMobLoot true"
+    execute console command "gamerule doMobSpawning true"
+    send "&aAll entities have been killed." to all players
+    stop
+    
+every 10 minutes:
+    ClearLag(true)
+    
+command clearlag [<boolean>]:
+    permission: staff.clearlag
+    trigger:
+        send "&cLag was cleared recently, please wait." to sender if difference between {clearinglag} and now < 1 minute
+        stop if difference between {clearinglag} and now < 1 minute
+        ClearLag(true) if arg 1 isn't set
+        ClearLag(true) if arg 1 is true
+        ClearLag(false) if arg 1 is false{command-spying::*} doesn't contain player's uuid:
+            add player's uuid to {command-spying::*}
+            send "&aYou are now spying commands." to player
+        else if {command-spying::*} contain player's uuid:
+            remove player's uuid from {command-spying::*}
+            send "&cYou are no longer spying commands." to player
+
+on command:
+    event isn't cancelled
+    send "&b%player% &7has ran &b/%full command%" to all players where [{command-spying::*} contains player's uuid]

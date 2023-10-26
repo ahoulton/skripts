@@ -1,0 +1,49 @@
+function formatNumber(n: number) :: text:
+    set {_data} to "QT,18|Q,15|T,12|B,9|M,6|k,3"
+    loop split {_data} at "|":
+        set {_s::*} to split loop-value at ","
+        {_n} >= 10 ^ {_s::2} parsed as number
+        return "%{_n} / 10 ^ {_s::2} parsed as number%%{_s::1}%"
+    return "%{_n}%"
+
+on join:
+    set join message to "%player% joined."
+    apply potion of night vision of tier 9999 without any particles to player for 9999999 days
+
+on quit:
+    set quit message to "%player% left."
+
+on damage:
+    cancel event
+
+on hunger bar change:
+    cancel event
+
+on drop:
+    cancel event
+
+on pickup:
+    cancel event
+
+on chat:
+    set {_level} to getLevel(player)
+    set chat format to "&8[%levelColor({_level})%%{_level}%&8] &f%player%: &f%message%"
+
+command /fly:
+    trigger:
+        if player's flight mode is false:
+            set player's flight mode to true
+            send "Enabled."
+        else if player's flight mode is true:
+            set player's flight mode to false
+            send "Disabled."
+
+command /setspawn:
+    permission: op
+    trigger:
+        set {location::spawn} to player's location
+        send "Spawn set."
+
+command /spawn:
+    trigger:
+        teleport player to {location::spawn}

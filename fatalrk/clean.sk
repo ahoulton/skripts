@@ -1,0 +1,32 @@
+function cleanArena():
+	if {cleaningarena} is true:
+		stop
+	set {cleaningarena} to true
+	send "&c&lCLEANING ARENA IN 10 SECONDS..." to all players
+	wait 5 seconds
+	send "&c&lCLEANING ARENA IN 5 SECONDS..." to all players
+	wait 1 second
+	send "&c&lCLEANING ARENA IN 4 SECONDS..." to all players
+	wait 1 second
+	send "&c&lCLEANING ARENA IN 3 SECONDS..." to all players
+	wait 1 second
+	send "&c&lCLEANING ARENA IN 2 SECONDS..." to all players
+	wait 1 second
+	send "&c&lCLEANING ARENA IN 1 SECOND..." to all players
+	wait 1 second
+	loop all blocks in region "arena-grass":
+		set loop-block to grass if loop-block isn't grass
+	loop all blocks in region "arena-dirt":
+		set loop-block to dirt if loop-block isn't dirt
+	loop all blocks in region "arena-stone":
+		set loop-block to stone if loop-block isn't stone
+	loop all blocks in region "arena-air":
+		set loop-block to air if loop-block isn't air
+	send "&a&lCLEANED ARENA." to all players
+	delete {cleaningarena}
+
+on skript start:
+	set {server::cameonline} to now
+	while {server::cameonline} is set:
+		wait 90 minutes
+		cleanArena()

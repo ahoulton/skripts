@@ -1,0 +1,42 @@
+options:
+	minixz: 100
+	maxxz: 90
+	miniy: 10
+	maxy: 20
+
+function RTP(p: player):
+	if {_p}'s world is "world":
+		set {_x} to random integer between {@minixz} and {@maxxz}
+		set {_y} to random integer between {@miniy} and {@maxy}
+		set {_z} to random integer between {@minixz} and {@maxxz}
+		set {_loc} to {rtptp}
+		add {_x} to x coord of {_loc}
+		add {_y} to y coord of {_loc}
+		add {_r} to z coord of {_loc}
+		teleport {_p} to {_loc}
+		set {rtping::%{_p}%} to true
+	else if {_p}'s world isn't "world":
+		stop
+
+command /debug:setrtpvariable:
+	permission: op
+	trigger:
+		set {rtptp} to the centre of player's world's world border
+
+on quit:
+	delete {rtping::%player%} if {rtping::%player%} is set
+
+on damage:
+	damage cause is fall
+	cancel event if {rtping::%victim%} is true
+	wait 1 tick
+	delete {rtping::%victim%}
+
+on command:
+	command isn't "rtp" or "skript:rtp"
+	delete {rtping::%player%} if {rtping::%player%} is true
+
+command rtp:
+	executable by: players
+	trigger:
+		RTP(sender)

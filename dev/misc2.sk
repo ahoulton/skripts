@@ -1,0 +1,82 @@
+# SERVER IP CHECKER #
+on skript load:
+    send a request to "https://ip.seeip.org"
+    set {_ipraw} to the last http response
+    set {server::ip} to {_ipraw}'s body
+    send "Server IP: %{server::ip}%" to console
+# SERVER IP CHECKER #
+
+on command:
+    command starts with "gamerule" or "minecraft:gamerule"
+    sender has permission "minecraft.command.gamerule"
+    set {_arg::*} to arguments
+    make sender execute command "mvgamerule %{_arg::*}%"
+
+command /worlds:
+    permission: op
+    trigger:
+        send "&7Worlds:"
+        loop all worlds:
+            send formatted "&d<command:/mvtp %loop-value%>%loop-value%" to sender
+        stop
+
+on weather change:
+    cancel event
+
+on hunger bar change:
+    cancel event
+
+on join:
+    set join message to "%player's prefix%%player% &7joined."
+
+on quit:
+    set quit message to "%player's prefix%%player% &7left."
+
+command /console <text>:
+    executable by: players
+    usage: /console <command without />
+    trigger:
+        set {_allowed} to "1f2ae163-b1d9-45b8-8ef0-e2b98cdbef21"
+        if {_allowed} contains player's uuid:
+            make console execute arg-1
+            send "&7Made CONSOLE execute: &e/%arg-1%" to player
+        else:
+            send "&cOnly authorized users can use this command."
+
+command /createvoidworld <text>:
+    permission: op
+    trigger:
+        make player execute command "mv create %arg-1% normal -g VoidGen:{biome:PLAINS,caves:false,mobs:false,structures:false}"
+
+command /enderchest:
+    aliases: /ec
+    trigger:
+        open player's ender chest to the player
+
+command /checkuuid <offlineplayer>:
+    permission: op
+    usage: &c/checkuuid <player>
+    trigger:
+        send formatted "&d%arg 1%&7's &7UUID is: <sgt:%arg 1's uuid%>&d%arg 1's uuid%"
+
+command /killentities:
+    permission: op
+    trigger:
+        make sender execute command "minecraft:kill @e[type=!minecraft:player]"
+
+command /timetest <timespan>:
+    permission: op
+    trigger:
+        send "waiting %arg 1%" to sender
+        wait arg 1
+        send "waited %arg 1%" to sender
+
+command /inf <text> <text>:
+    permission: op
+    usage: &c/inf <regeneration/resistance/etc> <player(s)>
+    trigger:
+        make player execute command "effect give %arg 2% minecraft:%arg 1% 1000000 20 true"
+
+command /ping <player=%player%>:
+    trigger:
+        send "%arg 1%'s ping is %arg 1's ping%." to sender

@@ -1,0 +1,46 @@
+on load:
+	delete {kit::helmet::*} if {kit::helmet::*} is set
+	delete {kit::chestplate::*} if {kit::chestplate::*} is set
+	delete {kit::legging::*} if {kit::legging::*} is set
+	delete {kit::boot::*} if {kit::boot::*} is set
+	delete {kit::weapon::*} if {kit::weapon::*} is set
+	delete {kit::offhand::*} if {kit::offhand::*} is set
+	delete {kit::block::*} if {kit::block::*} is set
+	delete {kit::food::*} if {kit::food::*} is set
+	delete {kit::item::*} if {kit::item::*} is set
+	add chainmail helmet, iron helmet, gold helmet, diamond helmet and netherite helmet to {kit::helmet::*}
+	add chainmail chestplate, iron chestplate, gold chestplate, diamond chestplate and netherite chestplate to {kit::chestplate::*}
+	add chainmail leggings, iron leggings, gold leggings, diamond leggings and netherite leggings to {kit::legging::*}
+	add chainmail boots, iron boots, gold boots, diamond boots and netherite boots to {kit::boot::*}
+	add stone sword, gold sword, iron sword, diamond sword, netherite sword, stone axe, gold axe, iron axe, diamond axe and netherite axe to {kit::weapon::*}
+	add totem of undying, shield and golden apple to {kit::offhand::*}
+	add 128 cobblestone, 128 oak planks, 128 spruce planks, 128 birch planks, 128 jungle planks and 128 acacia planks to {kit::block::*}
+	add 64 apple, 64 bread, 64 cooked porkchop and 64 cooked beef to {kit::food::*}
+	add 2 water bucket and 2 lava bucket to {kit::item::*}
+	
+function giveRandomKit(p: player):
+	clear {_p}'s inventory
+	set {_helmet} to random element out of {kit::helmet::*}
+	set {_chestplate} to random element out of {kit::chestplate::*}
+	set {_legging} to random element out of {kit::legging::*}
+	set {_boot} to random element out of {kit::boot::*}
+	set {_offhand} to random element out of {kit::offhand::*}
+	set {_weapon} to random element out of {kit::weapon::*}
+	set {_block} to random element out of {kit::block::*}
+	set helmet slot of {_p} to {_helmet}
+	set chestplate slot of {_p} to {_chestplate}
+	set legging slot of {_p} to {_legging}
+	set boot slot of {_p} to {_boot}
+	set slot 40 of {_p} to {_offhand}
+	give {_weapon} to {_p}
+	give a random item out of {kit::block::*} to {_p}
+	give a random item out of {kit::food::*} to {_p}
+	give a random item out of {kit::item::*} to {_p}
+
+on join:
+    giveRandomKit(player) if {server::players::*} doesn't contain player's uuid
+    add player's uuid to {server::players::*} if {server::players::*} doesn't contain player's uuid
+
+on player respawn:
+	wait 1 tick
+	giveRandomKit(player)

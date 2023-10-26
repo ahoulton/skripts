@@ -1,0 +1,81 @@
+options:
+    prefix: &r&7- &6&lREACTION &r&7-
+
+function chatGameDeleteTempVariables():
+    delete {chatgame::game}
+    delete {chatgame::reaction::word}
+    delete {chatgame::started}
+
+function chatGameStart():
+    if {chatgame::started} is true:
+        send "A chat game is already in progress." to console
+        stop
+    set {_r} to random integer between 1 and 1
+    if {_r} is 1:
+        if {chatgame::reaction::wordlist::*} isn't set:
+            send "There are no words to choose from, add a few to the {chatgame::reaction::wordlist::*} variable." to console
+            stop
+        set {chatgame::reaction::word} to random element out of {chatgame::reaction::wordlist::*}
+        set {chatgame::game} to "reaction"
+        send "{@prefix}%nl%&7First to type &e&l%{chatgame::reaction::word}% &7gets reduced drawing cooldown &7&o(for 1 hour)!" to all players
+        set {chatgame::started} to true
+        set {chatgame::started::when} to now
+
+on chat:
+    {chatgame::started} is true
+    if {chatgame::game} is "reaction":
+        if message is {chatgame::reaction::word}:
+            cancel event
+            if sender has permission "draw.reducedcooldown":
+                send "{@prefix}%nl%&e&l%sender% &r&7said &e&l%{chatgame::reaction::word}% &r&7first, however they already got reduced drawing cooldown. :(" to all players
+                chatGameDeleteTempVariables()
+                stop
+            make console execute command "lp user %sender% parent addtemp reducedcooldown 1h"
+            send "{@prefix}%nl%&e&l%sender% &r&7said &e&l%{chatgame::reaction::word}%&r &7first, therefore they got reduced drawing cooldown &7&o(for 1 hour)&r&7!" to all players
+            play sound "block.note_block.pling" to all players
+            chatGameDeleteTempVariables()
+
+every 1 second:
+    {chatgame::started} is true
+    difference between {chatgame::started::when} and now >= 30 seconds:
+        send "{@prefix}%nl%&7No one got the word in time. :(" to all players
+        chatGameDeleteTempVariables()
+
+command /reaction:word:add <text>:
+    permission: op
+    trigger:
+        if {chatgame::reaction::wordlist::*} contains arg-1:
+            send "%arg-1% is already added."
+            stop
+        add arg-1 to {chatgame::reaction::wordlist::*}
+        send "%arg-1% has been added."
+
+command /reaction:word:remove <text>:
+    permission: op
+    trigger:
+        if {chatgame::reaction::wordlist::*} doesn't contain arg-1:
+            send "%arg-1% isn't added."
+            stop
+        remove arg-1 from {chatgame::reaction::wordlist::*}
+        send "%arg-1% has been removed."
+
+command /reaction:word:list:
+    permission: op
+    trigger:
+        send "%{chatgame::reaction::wordlist::*}%"
+
+command /reaction:start:
+    permission: op
+    trigger:
+        if amount of all players <= 1:
+            stop
+        chatGameStart()
+
+command /reaction:stop:
+    permission: op
+    trigger:
+        if {chatgame::started} is true:
+            chatGameDeleteTempVariables()
+            send "{@prefix} &e%sender% &7has forcefully stopped the ongoing chat game." to all players
+        else:
+            send "{@prefix} &cNo chat game is running." to sender

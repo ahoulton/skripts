@@ -1,0 +1,82 @@
+options:
+    prefix: &7[S]
+
+command /tp <player>:
+    executable by: players
+    permission: staff.teleport
+    permission message: &cNo permission.
+    trigger:
+        if arg-1 is sender:
+            send action bar "&cYou cannot teleport to yourself." to player
+            stop
+        teleport player to arg-1
+        send action bar "&7Teleported to &a%arg-1%&7." to player
+
+command /tphere <player>:
+    executable by: players
+    permission: staff.teleporthere
+    permission message: &cNo permission.
+    trigger:
+        if arg-1 is sender:
+            send action bar "&cYou cannot teleport to yourself." to player
+            stop
+        teleport arg-1 to player
+        send action bar "&7Teleported &a%arg-1% &7to you." to player
+
+command /rtp:
+    aliases: /srtp, /randomtp, /staffrandomtp
+    executable by: players
+    permission: staff.randomtp
+    permission message: &cNo permission.
+    trigger:
+        set {_p::*} to all players where [input's group isn't "moderator", "administrator" or "owner"]
+        set {_p} to a random element out of {_p::*}
+        if {_p} isn't set:
+            send "&cThere are no non-staff players online!"
+            stop
+        teleport sender to {_p}
+
+function getVanish(p: player) :: boolean:
+    loop {vanished::*}:
+        return true if loop-value = {_p}
+    return false
+
+function setVanish(p: player, t: boolean):
+    if {_t} = true:
+        getVanish({_p}) = false
+        add {_p} to {vanished::*} if {vanished::*} doesn't contain {_p}
+        hide {_p} from all players where [input doesn't have permission "staff.vanish"]
+        set {_p}'s gamemode to creative if {_p}'s gamemode isn't creative
+        send "{@prefix} &b%{_p}% &7has vanished." to all players where [input has permission "staff.vanish"]
+    if {_t} = false:
+        getVanish({_p}) = true
+        remove {_p} from {vanished::*} if {vanished::*} contains {_p}
+        reveal {_p} to all players where [input doesn't have permission "staff.vanish"]
+        set {_p}'s gamemode to survival if {_p}'s gamemode isn't survival
+        send "{@prefix} &b%{_p}% &7has unvanished." to all players where [input has permission "staff.vanish"]
+
+on placeholderapi placeholder request for the prefix "vanish":
+    if the identifier is "isvanished":
+        set the result to "%getVanish(player)%"
+
+function updateVanish():
+    loop {vanished::*}:
+        hide loop-value from all players where [input doesn't have permission "staff.vanish"]
+
+on join:
+    updateVanish()
+    setVanish(player, false)
+
+on quit:
+    updateVanish()
+
+command /vanish:
+    aliases: /v
+    executable by: players
+    permission: staff.vanish
+    permission message: &cNo permission.
+    trigger:
+        if getVanish(player) = false:
+            setVanish(player, true)
+        else if getVanish(player) = true:
+            setVanish(player, false)

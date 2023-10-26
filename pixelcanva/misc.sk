@@ -1,0 +1,98 @@
+on join:
+    teleport player to {location::spawn}
+    set join message to "%player's prefix%%player% &7&ojoined."
+    wait 1 tick
+    set player's flight mode to true if player's flight mode is false
+
+on quit:
+    set quit message to "%player's prefix%%player% &7&oleft."
+
+on hunger bar change:
+    cancel event
+
+on gamemode change:
+    wait 1 tick
+    set player's flight mode to true if player's flight mode is false
+
+command /gma <player=%player%>:
+    permission: minecraft.command.gamemode
+    trigger:
+        make player execute command "/gamemode adventure %arg-1%"
+
+command /gmc <player=%player%>:
+    permission: minecraft.command.gamemode
+    trigger:
+        make player execute command "/gamemode creative %arg-1%"
+
+command /gms <player=%player%>:
+    permission: minecraft.command.gamemode
+    trigger:
+        make player execute command "/gamemode survival %arg-1%"
+
+command /gmsp <player=%player%>:
+    permission: minecraft.command.gamemode
+    trigger:
+        make player execute command "/gamemode spectator %arg-1%"
+
+command /spawn:
+    cooldown: 1 second
+    trigger:
+        teleport player to {location::spawn}
+
+command /setspawn:
+    permission: op
+    trigger:
+        set {location::spawn} to player's location
+        send "&aDone."
+
+command /console <text>:
+    executable by: players
+    permission: op
+    usage: /console <command without />
+    trigger:
+        set {_allowed} to "1f2ae163-b1d9-45b8-8ef0-e2b98cdbef21"
+        if {_allowed} contains player's uuid:
+            make console execute arg-1
+            send "&7Made CONSOLE execute: &e/%arg-1%" to player
+        else:
+            send "&cOnly authorized users can use this command."
+
+command /ping <player=%player%>:
+    trigger:
+        send "&e%arg 1%&7's ping is &e%arg 1's ping%&7." to sender
+
+command /announce <text>:
+    aliases: /alert, /bc, /broadcast
+    permission: op
+    trigger:
+        send "&8[&cAlert&8] &f%colored arg 1%" to all players
+
+on placeholderapi placeholder request for the prefix "skript":
+    if the identifier is "spc-rank":
+        set the result to player's group in strict proper case
+
+on drop:
+    cancel event
+
+on break:
+    if player's gamemode is creative:
+        {draw::canbuild::*} doesn't contain player's uuid
+        cancel event
+    else:
+        cancel event
+
+on place:
+    if player's gamemode is creative:
+        {draw::canbuild::*} doesn't contain player's uuid
+        cancel event
+    else:
+        cancel event
+
+on inventory click:
+    cancel event
+
+on swap hand items:
+    cancel event
+
+on server list ping:
+	cancel event

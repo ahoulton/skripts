@@ -1,0 +1,49 @@
+on quit:
+	remove player from {spleef::queue::*} if {spleef::queue::*} contains player
+	set quit message to "&7&o%player% quit."
+
+on chat:
+	if difference between {chat::%player's uuid%::lastsent} and now <= 1 second:
+		player doesn't have permission "chat.cooldown.bypass"
+		send "&cYou are chatting too quickly!"
+		cancel event
+		stop
+	set {chat::%player's uuid%::lastsent} to now
+	set chat format to "%player's prefix%%player%: %message%"
+
+on damage:
+	cancel event
+
+on block drop item:
+	cancel event
+	chance of 25%
+	give snowball to the player
+
+on hunger bar change:
+	cancel event
+
+on inventory click:
+	player's gamemode isn't creative
+	cancel event
+
+on swap hand items:
+	player's gamemode isn't creative
+	cancel event
+
+on place:
+	stop if player's gamemode is creative
+
+on break:
+	stop if player's gamemode is creative
+	if event-block is snow block:
+		if player's tool is any shovel:
+			if {spleef::allowbreaking} isn't set:
+				cancel event
+		else if player's tool isn't any shovel:
+			cancel event
+
+on drop:
+	cancel event
+
+on server list ping:
+	cancel event

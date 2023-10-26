@@ -1,0 +1,30 @@
+on load:
+	delete {rules::*} if {rules::*} is set
+	add "Don't draw anything inappropriate or offensive." to {rules::*}
+	add "Don't flood/spam chat." to {rules::*}
+	add "Don't leak personal information%nl%&eof other players." to {rules::*}
+	add "Don't post anything inappropiate/offensive%nl%&ein channels that we provide." to {rules::*}
+	add "Griefing the drawings of others is allowed,%nl%&ehowever staff may punish depending%nl%&eon context." to {rules::*}
+	add "No hatred towards other players/groups." to {rules::*}
+	add "Respect staff and other players." to {rules::*}
+	add "Respect and follow Xenon's guidelines/rules." to {rules::*}
+
+function openRuleGUI(p: player):
+	set metadata tag "rules-gui" of {_p} to chest inventory with 4 rows named "Rules"
+	set {_ts} to 0
+	loop 9 times:
+		set slot {_ts} of metadata tag "rules-gui" of {_p} to black stained glass pane named "&7yea uhhh, nothing here." with lore "&7like seriously I'm a placeholder.%nl%%nl%&7go read the nametag and papers.%nl%&7or like anything but read the other panes."
+		add 1 to {_ts}
+	set slot 4 of metadata tag "rules-gui" of {_p} to nametag named "&6Note&7:" with lore "%nl%&eWe are not overly strict with our rules,%nl%&emost of these should come under common sense.%nl%%nl%&eAny questions should be asked to staff."
+	set {_slot} to 10
+	set {_rule} to 1
+	loop {_rules::*}:
+		set slot {_slot} of metadata tag "rules-gui" of {_p} to paper named "&6Rule &e%{_rule}%&7:" with lore "%nl%&e%loop-value%"
+		add 1 to {_rule}
+		add 1 to {_slot}
+	open (metadata tag "rules-gui" of {_p}) to {_p}
+
+command /rules:
+	executable by: players
+	trigger:
+		openRuleGUI(player)

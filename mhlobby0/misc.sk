@@ -1,0 +1,92 @@
+on gamemode change:
+    player's group isn't "default"
+    wait 1 tick
+    set player's flight mode to true
+
+on connect:
+    if {data::%player's uuid%::rank} is set:
+        if "%groups of player%" contains {data::%player's uuid%::rank}:
+            stop
+    send a request to "https://api.minehut.com/cosmetics/profile/%player's uuid%"
+    set {_response} to the last http response
+    set {_body} to {_response}'s body
+    map json {_body} to {_bodyjson::*}
+    if {_bodyjson::rank} isn't set:
+        send "[DEBUG] Rank cannot be found for %player% (%player's uuid%)." to console
+        stop
+    set {data::%player's uuid%::rank} to {_bodyjson::rank}
+    make console execute command "lp user %player% parent add %{data::%player's uuid%::rank}%"
+
+on join:
+    set {data::%player's uuid%::initialjoin} to now if {data::%player's uuid%::initialjoin} isn't set
+    set {data::%player's uuid%::visibility} to true if {data::%player's uuid%::visibility} isn't set
+    set {data::%player's uuid%::credits} to 0 if {data::%player's uuid%::credits} isn't set
+    set player's gamemode to adventure
+    teleport player to {locations::spawn}
+    if player's group isn't "default":
+        set join message to "&f%player's prefix%%player% &3joined your lobby."
+    else if player's group is "default":
+        set join message to ""
+
+on join:
+    wait 1 second
+    set player's flight mode to true if player's group isn't "default"
+
+on quit:
+    delete {temp::*}  if {temp::*} is set
+    set quit message to ""
+
+on damage:
+    cancel event
+
+on food bar change:
+    cancel event
+
+on drop:
+    cancel event
+
+on player portal:
+    cancel event
+
+on swap hand items:
+    cancel event
+
+on inventory click:
+    player's gamemode isn't creative
+    cancel event
+
+command /elytra:
+    aliases: /ely
+    permission: vip
+    trigger:
+        set player's chestplate to unbreakable elytra
+        push player upwards at speed 10
+
+command /spawn:
+    trigger:
+        teleport player to {locations::spawn}
+
+command /gmc:
+    executable by: players
+    permission: staff
+    trigger:
+        if player's gamemode is creative:
+            send "You are already in Creative Mode" to sender
+            stop
+        set player's gamemode to creative
+        send "Set own game mode to Creative Mode" to sender
+
+command /gma:
+    executable by: players
+    permission: staff
+    trigger:
+        if player's gamemode is adventure:
+            send "You are already in Adventure Mode" to sender
+            stop
+        set player's gamemode to adventure
+        send "Set own game mode to Adventure Mode" to sender
+
+command /debug:networkstats:
+    permission: op
+    trigger:
+        send "Player Count: %{stats::formatted::player_count}%%nl%Server Count: %{stats::formatted::server_count}%%nl%Server Max: %{stats::formatted::server_max}%%nl%Ram Count: %{stats::formatted::ram_count}%%nl%Ram Max: %{stats::formatted::ram_max}%" to sender

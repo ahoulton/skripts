@@ -1,0 +1,50 @@
+command /delhome <text>:
+	executable by: players
+	usage: &c/delhome <home name>
+	trigger:
+		if {home::%player's uuid%::%arg-1%} is set:
+			delete {home::%player's uuid%::%arg-1%}
+			send "&c%arg-1%&7's location has been &cdeleted&7."
+		else if {home::%player's uuid%::%arg-1%} isn't set:
+			send "&c%arg-1%&7's location hasn't been saved or doesn't exist&7."
+
+command /sethome <text>:
+	executable by: players
+	usage: &c/sethome <home name>
+	trigger:
+		set {home::%player's uuid%::%arg-1%} to player's location
+		send "&a%arg-1%&7's location has been &aset&7."
+		
+command /home [<text>]:
+	executable by: players
+	usage: &c/home <home name>
+	trigger:
+		if arg-1 isn't set:
+			if {home::%player's uuid%::home} isn't set:
+				send "&cA home named 'home' is needed to use 'Quick Home'."
+			else if {home::%player's uuid%::home} is set:
+				teleport player to {home::%player's uuid%::home}
+		else if arg-1 is set:
+			teleport player to {home::%player's uuid%::%arg-1%} if {home::%player's uuid%::%arg-1%} is set
+			send "&c%arg-1%&7's location hasn't been saved or doesn't exist&7." if {home::%player's uuid%::%arg-1%} isn't set
+
+command /homes:
+	executable by: players
+	trigger:
+		if {home::%player's uuid%::*} isn't set:
+			send "&cNo homes are set!"
+			stop
+		send "&7Homes:"
+		loop {home::%player's uuid%::*}:
+			send formatted "<tooltip:&aClick HERE to teleport to &e%loop-index%&7.><command:/home %loop-index%>&e%loop-index%"
+			
+command /deleteallhomes [<text>]:
+	trigger:
+		if sender isn't console:
+			send "&cOnly CONSOLE can run this command."
+		else if sender is console:
+			if arg 1 isn't "confirm":
+				send "&cAre you SURE you want to delete ALL homes of ALL users?"
+			else if arg 1 is "confirm":
+				delete {home::*}
+				send "&aALL homes have been deleted."

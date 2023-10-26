@@ -1,0 +1,59 @@
+# highest ranks > lowest rank order, skript is retarded and assumes the top always.
+function checkHomeLimit(p: player) :: number:
+	return 20 if {_p} has permission "rank.fatal"
+	return 10 if {_p} has permission "rank.legend"
+	return 5 if {_p} has permission "rank.vip"
+	return 3
+
+command /delhome <text>:
+	executable by: players
+	usage: &cCorrect usage: /delhome <home>
+	trigger:
+		if {homes::%player's uuid%::%arg-1%} is set:
+			delete {homes::%player's uuid%::%arg-1%}
+			send "&eThe home named &6%arg-1% &ehas been deleted." to player
+			stop
+		send "&eThe home named &6%arg-1% &edoes not exist." to player if {homes::%player's uuid%::%arg-1%} is not set
+
+command /home <text>:
+	executable by: players
+	usage: &cCorrect usage: /home <home>
+	trigger:
+		teleport player to {homes::%player's uuid%::%arg-1%} if {homes::%player's uuid%::%arg-1%} is set
+		send "&eThe home named &6%arg-1% &edoes not exist." to player if {homes::%player's uuid%::%arg-1%} is not set  
+
+command /admin:homes <offline player>:
+	permission: op
+	trigger:
+		if {homes::%player's uuid%::*} isn't set:
+			send "&c%arg-1% &chas no homes."
+			stop
+		send "&7Homes:"
+		loop {homes::%player's uuid%::*}:
+			send formatted "<tooltip:&7Click &a&l&nHERE&r &7to teleport to &e%loop-index%&7.><command:/home %loop-index%>&e%loop-index%"
+
+command /homes:
+	aliases: /listhomes
+	executable by: players
+	trigger:
+		if {homes::%player's uuid%::*} isn't set:
+			send "&cYou have no homes."
+			stop
+		send "&7Homes:"
+		loop {homes::%player's uuid%::*}:
+			send formatted "<tooltip:&7Click &a&l&nHERE&r &7to teleport to &e%loop-index%&7.><command:/home %loop-index%>&e%loop-index%"
+
+command /sethome <text>:
+	executable by: players
+	usage: &cCorrect usage /sethome <home>
+	trigger:
+		if {homes::%player's uuid%::%arg-1%} is set:
+			send "&eThe home named &6%arg-1% &ealready exists!" to player
+			stop
+		else if {homes::%player's uuid%::%arg-1%} is not set:
+			set {_homes} to size of {homes::%player's uuid%::*}
+			if {_homes} >= checkHomeLimit(player):
+				send "&cYou have reached the limit of homes &7(&e%checkHomeLimit(player)%&7) &cfor your rank!" to player
+				stop
+			set {homes::%player's uuid%::%arg-1%} to player's location
+			send "&eThe home named &6%arg-1% &ehas been set." to player

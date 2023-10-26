@@ -1,0 +1,172 @@
+# classic, diamond, archer, tank.
+
+on join:
+	wait 1 tick
+	removeKit(player)
+
+function giveKit(p: player):
+	{_p}'s gamemode isn't spectator or creative
+	removeKit({_p})
+	if checkKit({_p}) is "Archer":
+		equip {_p} with unbreakable all leather armor
+		give {_p} unbreakable bow 
+		give {_p} 1 golden apple
+		give {_p} 64 arrow
+	if checkKit({_p}) is "Classic":
+		equip {_p} with unbreakable all chain armor
+		give {_p} unbreakable iron sword
+		give {_p} 1 golden apple
+	if checkKit({_p}) is "Diamond":
+		equip {_p} with unbreakable all diamond armor
+		give {_p} unbreakable diamond sword
+		give {_p} 1 golden apple
+	if checkKit({_p}) is "Tank":
+		set {_helmet} to iron helmet
+		enchant {_helmet} with protection 1
+		set {_p}'s helmet to unbreakable {_helmet}
+		set {_chestplate} to iron chestplate
+		enchant {_chestplate} with protection 1
+		set {_p}'s chestplate to unbreakable {_chestplate}
+		set {_leggings} to iron leggings
+		enchant {_leggings} with protection 1
+		set {_p}'s leggings to unbreakable {_leggings}
+		set {_boots} to iron boots
+		enchant {_boots} with protection 1
+		set {_p}'s boots to unbreakable {_boots}
+		set {_sword} to wooden sword
+		enchant {_sword} with sharpness 1
+		give {_p} unbreakable {_sword}
+		give {_p} 3 golden apple
+	if checkKit({_p}) is "VIP":
+		set {_helmet} to golden helmet
+		enchant {_helmet} with protection 1
+		set {_p}'s helmet to unbreakable {_helmet}
+		set {_chestplate} to golden chestplate
+		enchant {_chestplate} with protection 1
+		set {_p}'s chestplate to unbreakable {_chestplate}
+		set {_leggings} to golden leggings
+		enchant {_leggings} with protection 1
+		set {_p}'s leggings to unbreakable {_leggings}
+		set {_boots} to golden boots
+		enchant {_boots} with protection 1
+		set {_p}'s boots to unbreakable {_boots}
+		give {_p} unbreakable golden sword
+		give {_p} 1 golden apple
+	if checkKit({_p}) is "Legend":
+		set {_helmet} to chain helmet
+		enchant {_helmet} with protection 1
+		set {_p}'s helmet to unbreakable {_helmet}
+		set {_chestplate} to chain chestplate
+		enchant {_chestplate} with protection 1
+		set {_p}'s chestplate to unbreakable {_chestplate}
+		set {_leggings} to chain leggings
+		enchant {_leggings} with protection 1
+		set {_p}'s leggings to unbreakable {_leggings}
+		set {_boots} to chain boots
+		enchant {_boots} with protection 1
+		set {_p}'s boots to unbreakable {_boots}
+		set {_sword} to wooden sword
+		enchant {_sword} with sharpness 2
+		give {_p} unbreakable {_sword}
+		set {_stick} to stick
+		enchant {_stick} with knockback 2
+		give {_p} unbreakable {_stick}
+		give {_p} 1 golden apple
+	if checkKit({_p}) is "Fatal":
+		set {_helmet} to leather helmet
+		enchant {_helmet} with protection 3
+		set {_p}'s helmet to unbreakable {_helmet}
+		set {_chestplate} to leather chestplate
+		enchant {_chestplate} with protection 3
+		set {_p}'s chestplate to unbreakable {_chestplate}
+		set {_leggings} to leather leggings
+		enchant {_leggings} with protection 3
+		set {_p}'s leggings to unbreakable {_leggings}
+		set {_boots} to leather boots
+		enchant {_boots} with protection 3
+		set {_p}'s boots to unbreakable {_boots}
+		set {_sword} to wooden sword
+		enchant {_sword} with sharpness 2
+		give {_p} unbreakable {_sword}
+		set {_stick} to stick
+		enchant {_stick} with knockback 2
+		give {_p} unbreakable {_stick}
+		give {_p} unbreakable fishing rod
+		give {_p} 1 golden apple
+
+function removeKit(p: player):
+	set {_p}'s helmet to air
+	set {_p}'s chestplate to air
+	set {_p}'s leggings to air
+	set {_p}'s boots to air
+	clear {_p}'s inventory
+
+function checkKit(p: player) :: text:
+	set {_uid} to {_p}'s uuid
+	return {pref::%{_uid}%::kit} in strict proper case if {pref::%{_uid}%::kit} isn't "vip"
+	return "VIP" if {pref::%{_uid}%::kit} is "vip"
+
+command /setkit <text>:
+	executable by: players
+	usage: &c/setkit <archer/classic/diamond/tank/vip/legend/fatal>
+	trigger:
+		if {pref::%player's uuid%::kit} is arg-1:
+			send "&7Already set to: &c%arg-1 in strict proper case%" to sender
+			stop
+		if arg 1 is "vip" or "legend" or "fatal":
+			if player has permission "kits.donator":
+				if arg 1 is "vip":
+					if player has permission "kits.donator.vip":
+						set {pref::%player's uuid%::kit} to "vip"
+				if arg 1 is "legend":
+					if player has permission "kits.donator.legend":
+						set {pref::%player's uuid%::kit} to "legend"
+				if arg 1 is "fatal":
+					if player has permission "kits.donator.fatal":
+						set {pref::%player's uuid%::kit} to "fatal"
+		set {pref::%player's uuid%::kit} to "archer" if arg-1 is "archer"
+		set {pref::%player's uuid%::kit} to "classic" if arg-1 is "classic"
+		set {pref::%player's uuid%::kit} to "diamond" if arg-1 is "diamond"
+		set {pref::%player's uuid%::kit} to "tank" if arg-1 is "tank"
+		send "&7You'll get &a%checkKit(player)% &7when you next enter the arena!" to sender
+
+command /npc:kit [<text>]:
+	trigger:
+		if arg 1 isn't set:
+			create a gui with virtual chest inventory with 3 rows named "Kit Selector":
+				make gui 10 with leather helmet named "&eArcher":
+					make player execute command "setkit archer"
+					close player's inventory
+				make gui 12 with chain chestplate named "&eClassic":
+					make player execute command "setkit classic"
+					close player's inventory
+				make gui 14 with diamond leggings named "&eDiamond":
+					make player execute command "setkit diamond"
+					close player's inventory
+				make gui 16 with iron boots named "&eTank":
+					make player execute command "setkit tank"
+					close player's inventory
+				make gui 22 with chest named "&bDonator Kits":
+					close player's inventory
+					wait 1 tick
+					make player execute command "npc:kit donator"
+			open last gui for player
+		if arg 1 is "donator":
+			if player has permission "kits.donator":
+				create a gui with virtual chest inventory with 3 rows named "Donator Kits":
+					if player has permission "kits.donator.vip":
+						make gui 11 with paper named "&8[&aVIP&8]":
+							make player execute command "setkit vip"
+							close player's inventory
+					if player has permission "kits.donator.legend":
+						make gui 13 with paper named "&8[&5Legend&8]":
+							make player execute command "setkit legend"
+							close player's inventory
+					if player has permission "kits.donator.fatal":
+						make gui 15 with paper named "&8[&cFatal&8]":
+							make player execute command "setkit fatal"
+							close player's inventory
+				open last gui for player
+			else if player doesn't have permission "kits.donator":
+				send "&cNo permission."
+				stop

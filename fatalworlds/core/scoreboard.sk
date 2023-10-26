@@ -1,0 +1,17 @@
+on join:
+    while player is online:
+        if player's world isn't "lobby":
+            delete skoreboard for player
+        if player's world is "lobby":
+            setup skoreboard for player
+        set {_uuid} to player's uuid if {_uuid} isn't set
+        set {_w} to {worlds::%{_uuid}%::world}
+        set {_status} to "&a&nactivated&r&7." if {world::%{_w}%::status} is "online"
+        set {_status} to "&c&ndeactivated&r&7." if {world::%{_w}%::status} is "offline"
+        if player has a skoreboard:
+            set title of skoreboard player to "&8- &6fatalworlds &8-"
+            set slot 15 of skoreboard player to ""
+            set slot 14 of skoreboard player to "&e%{worlds::%{_uuid}%::world}%&7:"
+            set slot 13 of skoreboard player to "&7» %{_status}%"
+            set slot 12 of skoreboard player to ""
+        wait 1 tick

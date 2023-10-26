@@ -1,0 +1,33 @@
+options:
+    help prefix: &c&lHELP &7-
+    info prefix: &b&lINFO &7-
+    social prefix: &9&lSOCIAL &7-
+    store prefix: &d&lSTORE &7-
+    tip prefix: &e&lTIP &7-
+
+on load:
+    delete {auto-announcements::*} if {auto-announcements::*} is set
+    addAnnouncement("help", "You are currently playing on &cfatalness.minehut.gg&f.")
+    addAnnouncement("tip", "Use &6&n/rtp&r to randomly teleport across the overworld.")
+    addAnnouncement("info", "All worlds has a 100x100 world border, however only the overworld's border can be moved.")
+
+every 5 minutes:
+    set {_a} to a random element out of {auto-announcements::*} if {auto-announcements::*} is set
+    send "%nl%%{_a}%%nl%" to all players if {auto-announcements::*} is set
+
+function addAnnouncement(type: text, msg: text):
+    add "{@help prefix} &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "help"
+    add "{@info prefix} &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "info"
+    add "{@social prefix} &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "social"
+    add "{@tip prefix} &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "tip"
+
+command announcement:debug:
+    permission: op
+    permission message: &cYou cannot debug announcements.
+    trigger:
+        send "&rAnnouncements:%nl%%{auto-announcements::*}%%nl%%nl%&rAmount of announcements: %amount of {auto-announcements::*}%" to sender
+
+command .store <offline player> <text>:
+    executable by: console
+    trigger:
+        send "%nl%{@store prefix} &f%arg-1% &fhas purchased &f%colored arg-2% &ffrom our store &7&o(/buy)&r!%nl%" to all players

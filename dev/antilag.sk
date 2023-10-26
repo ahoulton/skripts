@@ -1,0 +1,27 @@
+options:
+    minimum tps: 14
+
+on load:
+    set {lagprotection} to false if {lagprotection} isn't set
+
+every 1 tick:
+    set {_tps} to tps from last 1m
+    if {_tps} <= {@minimum tps}:
+        kill all entities where [input isn't player] if {lagprotection} is false
+        send "&cDue to low TPS, enabling lag protection." to all players if {lagprotection} is false
+        set {lagprotection} to true if {lagprotection} is false
+    #else if {_tps} >= {@minimum tps}:
+        #send "&aTPS is stable, disabling lag protection." to all players if {lagprotection} is true
+        #set {lagprotection} to false if {lagprotection} is true
+
+on break:
+    cancel event if {lagprotection} is true
+
+on place:
+    cancel event if {lagprotection} is true
+
+on drop:
+    cancel event if {lagprotection} is true
+
+on pickup:
+    cancel event if {lagprotection} is true

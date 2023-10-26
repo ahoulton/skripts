@@ -1,0 +1,38 @@
+options:
+    cleared: %nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%%nl%
+    perm: staff
+    permmsg: &cYou don't have permission to manage chat.
+    scolor: &c # color sender will show in.
+    rcolor: &d # color reasons will show in.
+
+on load:
+    set {chatmute} to false if {chatmute} isn't set
+
+on chat:
+    if {chatmute} is true:
+        cancel event if player doesn't have permission "{@perm}"
+        send "&7Chat is currently muted." if player doesn't have permission "{@perm}"
+    set {_colour} to "&f" if player has permission "whitechat"
+    set {_colour} to "&7" if player doesn't have permission "whitechat"
+    set chat format to "%player's prefix%%player%%{_colour}%: %{_colour}%%message%"
+
+command clearchat:
+    permission: {@perm}
+    permission message: {@permmsg}
+    trigger:
+        send "{@cleared}" to all players where [input doesn't have permission "{@perm}"]
+        send "&7A staff member has cleared chat." to all players where [input does not have permission "{@perm}"]
+        send "{@scolor}%sender% &7has cleared chat. &7(you bypass this, therefore chat wasn't cleared for you.)" to all players where [input has permission "{@perm}"]
+
+command mutechat:
+    permission: {@perm}
+    permission message: {@permmsg}
+    trigger:
+        if {chatmute} is false:
+            set {chatmute} to true
+            send "&7A staff member has muted chat. &cYou cannot send messages." to all players where [input does not have permission "{@perm}"]
+            send "{@scolor}%sender% &7has muted chat. &7(you bypass this, you can send messages regardless.)" to all players where [input has permission "{@perm}"]
+        else if {chatmute} is true:
+            set {chatmute} to false
+            send "&7A staff member has unmuted chat. &aYou can now send messages." to all players where [input does not have permission "{@perm}"]
+            send "{@scolor}%sender% &7has unmuted chat." to all players where [input has permission "{@perm}"]

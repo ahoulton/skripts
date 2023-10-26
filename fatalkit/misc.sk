@@ -1,0 +1,61 @@
+on join:
+	set join message to "%player's prefix%%player's displayname% &ajoined&7."
+	teleport player to {location::spawn}
+	set player's selected hotbar slot to slot 0 of player
+	wait 1 tick
+	send "%nl%%nl%&7Welcome to &c&lfatalkit&7, &e%player's displayname%&7!%nl%&7Discord: &9/discord%nl%%nl%"
+	set {_uuid} to player's uuid
+	if {_uuid} starts with "00000000-0000-0000":
+		set player's gamemode to spectator
+		send "&c&l&nPLEASE READ &r&7- &c&l&nPLEASE READ &r&7- &c&l&nPLEASE READ%nl%&7Bedrock isn't supported due to it causing anticheat falses, get Java Edition to join in the fight!%nl%&c&l&nPLEASE READ &r&7- &c&l&nPLEASE READ &r&7- &c&l&nPLEASE READ"
+	else:
+		set player's gamemode to adventure if isInModMode(player) is false
+	
+on quit:
+	set quit message to "%player's prefix%%player's displayname% &cleft&7."
+	
+on chat:
+	if {sctoggled::*} contains player's uuid:
+		make player execute command "/sc %message%"
+		cancel event
+	if {chatmuted} is true:
+		player doesn't have permission "mutechat.bypass"
+		send "&cChat is currently muted."
+		cancel event
+	set {_c} to "&7" if player doesn't have permission "whitechat"
+	set {_c} to "&f" if player has permission "whitechat"
+	set {_lc} to levelColor(getLevel(player))
+	set {_l} to getLevel(player)
+	set chat format to "&7[%{_lc}%%{_l}%&7] &f%player's prefix%%player's displayname%%player's suffix%%{_c}%: %{_c}%%message%"
+	
+on hunger bar change:
+	cancel event
+
+on damage:
+	cancel event if damage cause is fall
+
+on drop:
+	send "&cI'm not cleaning up after you, use /trash!" to player
+	cancel event
+
+on weather change:
+	cancel event
+
+command /ping <player=%player%>:
+	trigger:
+		send "%arg 1's prefix%%arg 1%&7's ping is: &e%arg 1's ping%"
+
+command /spawn:
+	trigger:
+		if isinCombat(player) is true:
+			send "&cYou cannot use /spawn whilst in combat." to player
+			stop
+		teleport player to {location::spawn} if {location::spawn} is set
+		send "&cSpawn isn't set, ask a administrator to do so." if {location::spawn} isn't set
+		
+command /alert <text>:
+	aliases: /bc, /broadcast
+	permission: op
+	usage: &c/alert <msg>
+	trigger:
+		send "&8[&4Alert&8] &f%colored arg-1%" to all players

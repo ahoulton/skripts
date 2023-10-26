@@ -1,0 +1,36 @@
+on load:
+	set {sbloaded} to now
+	while {sbloaded} is set:
+		send a "get" request to "https://api.minehut.com/network/simple_stats"
+		set {stats::response} to the last http response
+		set {stats::body} to {stats::response}'s body
+		copy the json from {stats::body} to {stats::formatted::*}
+		set {stats::players} to {stats::formatted::player_count} if {stats::formatted::player_count} is set
+		set {stats::servers} to {stats::formatted::server_count} if {stats::formatted::server_count} is set
+		set {stats::players} to "N/A" if {stats::formatted::player_count} isn't set
+		set {stats::servers} to "N/A" if {stats::formatted::server_count} isn't set
+		wait 1 second
+
+on unload:
+	delete {stats::*} if {stats::*} is set
+
+function scoreboardRank(p: player) :: text:
+	return {_p}'s prefix if {_p}'s group isn't "default"
+	return "&7Default" if {_p}'s group is "default"
+
+function playerHasServers(p: player) :: boolean:
+	set {_uid} to {_p}'s uuid
+	return true if {data::%{_uid}%::servers::*} is set
+	return false if {data::%{_uid}%::servers::*} isn't set
+
+on placeholderapi placeholder request for the prefix "skript":
+	if the identifier is "sb-aos":
+		set the result to "%amount of {data::%player's uuid%::servers::*}%"
+	if the identifier is "sb-hasservers":
+		set the result to "%playerHasServers(player)%"
+	if the identifier is "sb-rank":
+		set the result to scoreboardRank(player)
+	if the identifier is "stats-players":
+		set the result to "%{stats::players}%"
+	if the identifier is "stats-servers":
+		set the result to "%{stats::servers}%"

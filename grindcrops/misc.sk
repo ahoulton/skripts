@@ -1,0 +1,60 @@
+function format(n: number) :: text:
+    set {_data} to "QT,18|Q,15|T,12|B,9|M,6|k,3"
+    loop split {_data} at "|":
+        set {_s::*} to split loop-value at ","
+        {_n} >= 10 ^ {_s::2} parsed as number
+        return "%{_n} / 10 ^ {_s::2} parsed as number%%{_s::1}%"
+    return "%{_n}%"
+
+command /fly:
+    permission: donator.fly
+    trigger:
+        if player's flight mode is false:
+            set player's flight mode to true
+            send "&7&oEnabled flight."
+        else if player's flight mode is true:
+            set player's flight mode to false
+            send "&7&oDisabled flight."
+
+command /gma [<player=%player%>]:
+    permission: minecraft.command.gamemode
+    trigger:
+        make sender execute command "gamemode adventure %arg-1%"
+
+command /gmc [<player=%player%>]:
+    permission: minecraft.command.gamemode
+    trigger:
+        make sender execute command "gamemode creative %arg-1%"
+
+command /gms [<player=%player%>]:
+    permission: minecraft.command.gamemode
+    trigger:
+        make sender execute command "gamemode survival %arg-1%"
+
+command /gmsp [<player=%player%>]:
+    permission: minecraft.command.gamemode
+    trigger:
+        make sender execute command "gamemode spectator %arg-1%"
+
+on join:
+    set player's flight mode to true if player has permission "donator.fly"
+    teleport player to {location::spawn}
+    set join message to "%player's prefix%%player% &7joined."
+
+on quit:
+    set quit message to "%player's prefix%%player% &7left."
+
+on block interact:
+    cancel event
+
+on hunger bar change:
+    cancel event
+    
+on damage:
+    cancel event
+
+on swap hand items:
+    cancel event
+    
+on server list ping:
+	cancel event

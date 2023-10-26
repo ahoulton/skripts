@@ -1,0 +1,33 @@
+on break:
+	stop if player's gamemode is creative
+	if player doesn't have enough space for 1 wheat:
+		player's gamemode isn't creative
+		play sound "entity.zombie.break_wooden_door"
+		send action bar "&c&lINVENTORY FULL! &7&lUSE /SELL OR COMPRESS ITEMS!" to player
+		cancel event
+		stop
+	if player's held item isn't any hoe:
+		event-block is wheat
+		send action bar "&cThis crop is too strong for your hands, use your hoe!" to player
+		cancel event
+		stop
+	if event-block is wheat[age=7]:
+		if player's held item is any hoe:
+			give player 1 wheat 
+			set event-block to freshly planted wheat plant
+	cancel event
+
+on right click on crafting table:
+	player's gamemode isn't creative
+	if player has 320 wheat:
+		remove 320 wheat from player's inventory
+		give 1 hay block to player
+		play sound "block.anvil.use"
+		send action bar "&aCompressed! &7&o320 Wheat (5 stacks) > 1 Hay Bale." to player
+	else:
+		play sound "block.note_block.banjo"
+		send action bar "&cYou need atleast 5 stacks of wheat to compress!" to player
+	cancel event
+
+on place:
+	cancel event if player's gamemode isn't creative

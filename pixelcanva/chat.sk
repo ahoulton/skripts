@@ -1,0 +1,120 @@
+options:
+    acprefix: &c[A]
+    dcprefix: &d[D]
+    scprefix: &7[S]
+
+on chat:
+    if {chat::admin::*} contains sender's uuid:
+        cancel event
+        make player execute command "/ac %message%"
+    if {chat::donator::*} contains sender's uuid:
+        cancel event
+        make player execute command "/dc %message%"
+    if {chat::staff::*} contains sender's uuid:
+        cancel event
+        make player execute command "/sc %message%"
+    else if {chat::admin::*} or {chat::donator::*} or {chat::staff::*} doesn't contain sender's uuid:
+        set {_c} to "&7" if player doesn't have permission "whitechat"
+        set {_c} to "&f" if player has permission "whitechat"
+        set chat format to "%player's prefix%%player%%player's suffix%%{_c}%: %{_c}%%message%"
+
+command /chat <text>:
+    usage: &c/chat <admin/donator/global/ranked/staff>
+    trigger:
+        if arg-1 is "admin":
+            make player execute command "/ac"
+        if arg-1 is "donator" or "ranked":
+            make player execute command "/dc"
+        if arg-1 is "global":
+            make player execute command "/gc"
+        if arg-1 is "staff":
+            make player execute command "/sc"
+
+command /ac [<text>]:
+    permission: chat.admin
+    usage: &c/ac <message>
+    trigger:
+        if arg-1 isn't set:
+            if {chat::donator::*} contains sender's uuid:
+                remove sender's uuid from {chat::donator::*}
+                add sender's uuid to {chat::admin::*}
+                send "&cYou were automatically removed from donator chat, all your messages will now go to admin chat."
+                stop
+            if {chat::staff::*} contains sender's uuid:
+                remove sender's uuid from {chat::staff::*}
+                add player's uuid to {chat::admin::*}
+                send "&cYou were automatically removed from staff chat, all your messages will now go to admin chat."
+                stop
+            if {chat::admin::*} contains sender's uuid:
+                remove sender's uuid from {chat::admin::*}
+                send "&cYou have disabled admin chat, all messages will go to public chat."
+                stop
+            if {chat::admin::*} doesn't contain sender's uuid:
+                add sender's uuid to {chat::admin::*}
+                send "&aYou have enabled admin chat, all messages will not be sent to public chat."
+                stop
+        else if arg-1 is set:
+            send "{@acprefix} &f%player's prefix%%player%&7: &f%arg 1%" to all players where [input has permission "chat.admin"]
+
+command /dc [<text>]:
+    aliases: /rc
+    permission: chat.donator
+    usage: &c/dc <message>
+    trigger:
+        if arg-1 isn't set:
+            if {chat::admin::*} contains sender's uuid:
+                remove sender's uuid from {chat::admin::*}
+                add player's uuid to {chat::donator::*}
+                send "&cYou were automatically removed from admin chat, all your messages will now go to donator chat."
+                stop
+            if {chat::staff::*} contains sender's uuid:
+                remove sender's uuid from {chat::staff::*}
+                add player's uuid to {chat::donator::*}
+                send "&cYou were automatically removed from staff chat, all your messages will now go to donator chat."
+                stop
+            if {chat::donator::*} contains sender's uuid:
+                remove sender's uuid from {chat::donator::*}
+                send "&cYou have disabled donator chat, all messages will go to public chat."
+                stop
+            if {chat::donator::*} doesn't contain sender's uuid:
+                add sender's uuid to {chat::donator::*}
+                send "&aYou have enabled donator chat, all messages will not be sent to public chat."
+                stop
+        else if arg-1 is set:
+            send "{@dcprefix} &f%player's prefix%%player%&7: &f%arg 1%" to all players where [input has permission "chat.donator"]
+
+command /gc:
+    trigger:
+        if {chat::admin::*} or {chat::donator::*} or {chat::staff::*} contains sender's uuid:
+            remove sender's uuid from {chat::admin::*}
+            remove sender's uuid from {chat::donator::*}
+            remove sender's uuid from {chat::staff::*}
+            send "&aYou are now typing in global chat."
+            stop
+        send "&cYou are already typing in global chat!"
+
+command /sc [<text>]:
+    permission: chat.staff
+    usage: &c/sc <message>
+    trigger:
+        if arg-1 isn't set:
+            if {chat::admin::*} contains sender's uuid:
+                remove sender's uuid from {chat::admin::*}
+                add sender's uuid to {chat::staff::*}
+                send "&cYou were automatically removed from admin chat, all your messages will now go to staff chat."
+                stop
+            if {chat::donator::*} contains sender's uuid:
+                remove sender's uuid from {chat::donator::*}
+                add sender's uuid to {chat::staff::*}
+                send "&cYou were automatically removed from donator chat, all your messages will now go to staff chat."
+                stop
+            if {chat::staff::*} contains sender's uuid:
+                remove sender's uuid from {chat::staff::*}
+                send "&cYou have disabled staff chat, all messages will go to public chat."
+                stop
+            if {chat::staff::*} doesn't contain sender's uuid:
+                add sender's uuid to {chat::staff::*}
+                send "&aYou have enabled staff chat, all messages will not be sent to public chat."
+                stop
+        else if arg-1 is set:
+            send "{@scprefix} &f%player's prefix%%player%&7: &f%arg 1%" to all players where [input has permission "chat.staff"]

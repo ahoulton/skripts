@@ -1,0 +1,31 @@
+on region exit:
+	if "%region at player%" is "spawn in world world":
+		if {antileavespawn} is false:
+			player's gamemode isn't spectator or creative
+			giveKit(player) if isInModMode(player) is false
+
+on region enter:
+	if "%region at player%" is "<none>":
+		if isinCombat(player) is true:
+			cancel event
+			stop
+		player's gamemode isn't spectator or creative
+		removeKit(player) if isInModMode(player) is false
+
+on death:
+	removeKit(victim)
+	if attacker is a player:
+		victim is a player
+		set death message to ""
+		set {_g} to "&7&oYou have been given a golden apple." if attacker's inventory doesn't contain 4 golden apple
+		set {_g} to "&7&oNo more golden apples for you due to reaching the limit!" if attacker's inventory contains 4 golden apple
+		give attacker 2 golden apple if attacker's inventory doesn't contain 4 golden apple
+		send "&7You have killed &e%victim's displayname%&7! %{_g}%" to attacker
+		send "&e%attacker's displayname% &7(&c%attacker's health% &chealth&7) &7killed you." to victim
+	else if attacker isn't a player:
+		set death message to ""
+
+command /trash:
+    trigger:
+        set metadata tag "trash" of player to chest inventory with 6 rows
+        open (metadata tag "trash" of player) to player

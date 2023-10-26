@@ -1,0 +1,24 @@
+options:
+    time: 1 minute # how long a player should be deathbanned for (NEEDS TO BE A SKRIPT SUPPORTED TIMESPAN).
+
+on death:
+    set {deathbanned::%player's uuid%::when} to now
+    wait 1 tick # avoids a critical error.
+    kick player due to "&cYou have been deathbanned for {@time}&c." if player is online
+
+on connect:
+    {deathbanned::%player's uuid%::when} is set
+    if difference between {deathbanned::%player's uuid%::when} and now < {@time}:
+        kick player due to "&cYou are still deathbanned for %difference between {deathbanned::%player's uuid%::when} and now%&c."
+    else if difference between {deathbanned::%player's uuid%::when} and now > {@time}:
+        delete {deathbanned::%player's uuid%::when}
+
+command removedeathban <offline player>:
+    permission: op
+    permission message: &cYou don't have permission.
+    trigger:
+        if {deathbanned::%arg 1's uuid%::when} is set:
+            delete {deathbanned::%arg 1's uuid%::when}
+            send "&a%arg 1%&a's deathban have been removed." to sender
+        else:
+            send "&c%arg 1% &cisn't deathbanned." to sender

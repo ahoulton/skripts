@@ -1,0 +1,44 @@
+on connect:
+    if event isn't cancelled:
+        if {ip::%player's ip%::players::*} contains "%player%":
+            stop
+        else if {ip::%player's ip%::players::*} does not contain "%player%":
+            add player to {ip::%player's ip%::players::*}
+
+on join:
+    if event isn't cancelled:
+        if {ememptedips::*} contains player's ip:
+            stop
+        else if {ememptedips::*} does not contain player's ip:
+            if amount of {ip::%player's ip%::players::*} > 1:
+                send "&d%player% &7has known alt accounts!" to all players where [input has permission "staff.alts.alert"]
+
+command /alts <player>:
+    permission: staff.alts.check
+    permission message: &cYou cannot check alt accounts.
+    usage: &c/alts <player> &7&o(online players only)
+    trigger:
+        if amount of {ip::%arg 1's ip%::players::*} = 1:
+            send "&d%arg 1% &7has no known alt accounts."
+        else if amount of {ip::%arg 1's ip%::players::*} > 1:
+            send "&d%arg 1%&7's known alt accounts &7(IP: &d%arg 1's ip%&7):%nl%&b%{ip::%arg 1's ip%::players::*}%"
+
+command /ipexempt <text> [<text>]:
+    permission: staff.alts.ipexempt
+    permission message: &cYou cannot manage this.
+    usage: &c/ipexempt <add/remove/list> [<IP (USE /checkip FOR MASKED IP)>]
+    trigger:
+        if arg 1 is "add":
+            if {ememptedips::*} does not contain arg 2:
+                add arg 2 to {ememptedips::*}
+                send "&7Added &b%arg 2% &7to exemption list. &7&oAny players who joined on this IP will bypass alt alerts!"
+            else:
+                send "&b%arg 2% &7is already emempted!"
+        if arg 1 is "remove":
+            if {ememptedips::*} contain arg 2:
+                remove arg 2 from {ememptedips::*}
+                send "&7Removed &b%arg 2% &7from exemption list."
+            else:
+                send "&b%arg 2% &7is not emempted."
+        if arg 1 is "list":
+            send "&7Here's the list of emempted IPs:%nl%&b%{ememptedips::*}%"

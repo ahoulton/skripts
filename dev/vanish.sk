@@ -1,0 +1,75 @@
+options:
+    perm: vanish.use
+
+function checkFlight(p: player):
+    set {_v} to getVanish({_p})
+    {_p}'s gamemode isn't creative or spectator
+    if {_v} is true:
+        set {_p}'s flight mode to true
+    else if {_v} is false:
+        set {_p}'s flight mode to false
+
+function getVanish(p: player) :: boolean:
+    loop {vanished::*}:
+        return true if loop-value = {_p}
+    return false
+
+function setVanish(p: player, t: boolean):
+    if {_t} = true:
+        add {_p} to {vanished::*}
+        hide {_p} from all players where [input doesn't have permission "{@perm}"]
+        set {_p}'s gamemode to spectator if {_p}'s gamemode isn't spectator
+    if {_t} = false:
+        remove {_p} from {vanished::*}
+        reveal {_p} to all players where [input doesn't have permission "{@perm}"]
+        set {_p}'s gamemode to survival if {_p}'s gamemode isn't survival
+
+function updateVanish():
+    loop {vanished::*}:
+        hide loop-value from all players where [input doesn't have permission "{@perm}"]
+
+on join:
+    updateVanish()
+    if {vanished::*} contains player:
+        set join message to ""
+    if player doesn't have permission "{@perm}":
+        {vanished::*} contains player
+        setVanish(player, false)
+
+on quit:
+    updateVanish()
+    player has permission "{@perm}"
+    if {vanished::*} contains player:
+        set quit message to ""
+
+on damage:
+    attacker is a player
+    victim is a player
+    getVanish(attacker) = true
+    cancel event
+    send "&cYou cannot damage others while vanished." to attacker
+
+on break:
+    getVanish(player) = true
+    cancel event
+    send "&cYou cannot modify blocks while vanished." to player
+
+on place:
+    getVanish(player) = true
+    cancel event
+    send "&cYou cannot modify blocks while vanished." to player
+
+command /vanish:
+    aliases: /v
+    executable by: players
+    permission: {@perm}
+    permission message: &cNo permissions.
+    trigger:
+        if getVanish(player) = false:
+            setVanish(player, true)
+            checkFlight(player)
+            send "&b%sender% &7has vanished." to all players where [input has permission "{@perm}"]
+        else if getVanish(player) = true:
+            setVanish(player, false)
+            checkFlight(player)
+            send "&b%sender% &7has unvanished." to all players where [input has permission "{@perm}"]

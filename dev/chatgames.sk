@@ -1,0 +1,35 @@
+options:
+    prefix: &r&7- &d&lREACTION &r&7-
+
+function chatGameDeleteTempVariables():
+    delete {chatgame::game}
+    delete {chatgame::reaction::word}
+    delete {chatgame::started}
+
+function chatGameStart():
+    if {chatgame::started} is true:
+        send "A chat game is already in progress." to console
+        stop
+    set {_r} to random integer between 1 and 1
+    if {_r} is 1:
+        if {chatgame::reaction::wordlist::*} isn't set:
+            send "There are no words to choose from, add a few to the {chatgame::reaction::wordlist::*} variable." to console
+            stop
+        set {chatgame::reaction::word} to random element out of {chatgame::reaction::wordlist::*}
+        set {chatgame::game} to "reaction"
+        send "%nl%{@prefix}%nl%&7First to type &d&l%{chatgame::reaction::word}% &7wins!%nl%" to all players
+        set {chatgame::started} to true
+
+on chat:
+    {chatgame::started} is true
+    if {chatgame::game} is "reaction":
+        if message is {chatgame::reaction::word}:
+            cancel event
+            send "%nl%{@prefix}%nl%&d&l%sender% &r&7said &d&l%{chatgame::reaction::word}% &r&7first, therefore they win!" to all players
+            play sound "block.note_block.pling" to all players
+            chatGameDeleteTempVariables()
+
+command /startchatgame:
+    permission: op
+    trigger:
+        chatGameStart()

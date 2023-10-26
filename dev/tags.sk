@@ -1,0 +1,120 @@
+function canUseTag(p: player, t: text) :: boolean:
+    return true if {_p} has permission "%{_t}%"
+    return false if {_p} doesn't have permission "%{_t}%"
+
+command /tag:allowcustom <offline player>:
+    executable by: console
+    trigger:
+        if {tags::allowcustom::*} contains arg-1's uuid:
+            send "[DEBUG] %arg-1% (%arg-1's uuid%) already has a custom tag." to console
+            stop
+        add arg-1's uuid to {tags::allowedcustom::*} if {tags::allowedcustom::*} doesn't contain arg-1's uuid
+        send "[DEBUG] %arg-1% (%arg-1's uuid%) has been given access to ONE custom tag." to console
+
+command /setcustomtag <text>:
+    executable by: players
+    usage: &c/setcustomtag <tag with colors>
+    trigger:
+        if {tags::allowedcustom::*} contains sender's uuid:
+            set {tags::custom::%sender's uuid%} to " %arg-1%"
+            set player's suffix to " %{tags::custom::%sender's uuid%}%"
+            send "&aYou have set your custom tag to: %colored {tags::custom::%sender's uuid%}%"
+            remove sender's uuid from {tags::allowedcustom::*}
+        else if {tags::allowedcustom::*} doesn't contain sender's uuid:
+            send "&cYou don't have a use, you can buy a use at &7store.rawsteal.net&c."
+
+command /tag:forcesetcustom <offline player> <text>:
+    usage: &c/tag:forcesetcustom <player> <tag with colors>
+    permission: op
+    trigger:
+        set {tags::custom::%arg 1's uuid%} to " %arg-2%"
+        set arg-1's suffix to " %arg-2%"
+        send "&a%arg-1%&a's custom tag has been updated to: %colored arg-2%" to sender
+
+command /usecustomtag:
+    executable by: players
+    trigger:
+        if player's suffix is " %colored {tags::custom::%sender's uuid%}%":
+            send "&cYou are already using this tag."
+            stop
+        set player's suffix to " %{tags::custom::%sender's uuid%}%"
+        send "&aYour custom tag has been applied." to sender
+
+command /tag:create <text> <text> <text>:
+    executable by: players
+    permission: op
+    usage: /tag:create <friendly name> tag.<permission> <tag with colors>
+    trigger:
+        if {tags::%arg-1%} and {tags::%arg-1%::perm} is set:
+            send "&c%arg-1% &cis already a tag."
+            stop
+        set {tags::%arg-1%} to arg-3
+        set {tags::%arg-1%::perm} to "tag.%arg-2%"
+        send "&aCreated tag &f%arg-1% &7(&r%colored arg-3%&7) &aneeding permission &f%arg-2%&a."
+
+command /tag:delete <text>:
+    permission: op
+    usage: /tag:delete <friendly name>
+    trigger:
+        if {tags::%arg-1%} and {tags::%arg-1%::perm} isn't set:
+            send "&c%arg-1% &cdoesn't exist."
+            stop
+        delete {tags::%arg-1%::*}
+        delete {tags::%arg-1%}
+        send "&aDeleted the tag &f%arg-1%&a."
+
+command /tag:list:
+    permission: op
+    trigger:
+        loop {tags::*}:
+            send "%loop-index% - %colored loop-value%&r - %{tags::%loop-index%::perm}%"
+
+command /tags:
+    executable by: players
+    trigger:
+        create a gui with virtual chest inventory with 6 rows named "&bSelect a tag.":
+            set {_s} to 0
+            loop {tags::*}:
+                if {_s} >= 44:
+                    stop
+                set {_cut} to canUseTag(player, "%{tags::%loop-index%::perm}%")
+                set {_ht} to "&aYou can use this tag!" if {_cut} is true
+                set {_ht} to "&cYou can't use this tag!" if {_cut} is false
+                make gui {_s} with name tag named colored loop-value with lore "&f%{tags::%loop-index%::perm}%", "%{_ht}%"
+                add 1 to {_s}
+            make gui 49 with barrier named "&cClear Tag" with lore "&cClear your tag by clicking this."
+            if {tags::allowedcustom::*} contains sender's uuid:
+                make gui 45, 46, 47, 48, 50, 51, 52, 53 with redstone block named "&cSet Custom Tag" with lore "&cThanks for supporting us and buying a use,%nl%&cuse /setcustomtag <tag with colors> to set your tag."
+            if {tags::custom::%sender's uuid%} is set:
+                make gui 45, 46, 47, 48, 50, 51, 52, 53 with emerald block named "&aUse Custom Tag" with lore "&aClick here to use your custom tag."
+        open last gui for player
+
+on inventory click:
+    if name of event-inventory is "&bSelect a tag.":
+        set {_s} to clicked slot
+        set {_p} to name of clicked slot
+        set {_fl} to first element out of lore of {_s}
+        set {_ul} to uncolored {_fl}
+        if {_s} is emerald block:
+            make player execute command "/usecustomtag"
+            close player's inventory
+        if {_s} is barrier:
+            if player's suffix is "":
+                send "&cYou don't have a tag set."
+                close player's inventory
+                stop
+            set player's suffix to ""
+            send "&aYour tag has been cleared."
+            close player's inventory
+        if {_s} is name tag:
+            if {_p} is set:
+                if player's suffix is " %{_p}%":
+                    send "&cYou are already using this tag."
+                    stop
+                if canUseTag(player, "%{_ul}%") is true:
+                    set player's suffix to " %{_p}%"
+                    send "&aYou have applied the %{_p}%&r &asuffix." to sender
+                if canUseTag(player, "%{_ul}%") is false:
+                    send "&cYou don't have permission to use this tag." to sender
+            close player's inventory
+        cancel event

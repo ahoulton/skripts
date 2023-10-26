@@ -1,0 +1,36 @@
+on walking on slime block:
+    {slimejump.%player's uuid%} is set
+    set {_upward} to {slimejump::settings::upward}
+    push player upwards at speed {_upward}
+
+on damage:
+    damage cause is fall:
+        {slimejump.%victim's uuid%} is set
+        cancel event
+
+on load:
+    set {slimejump::settings::upward} to 10 if {slimejump::settings::upward} isn't set
+
+command /slimejump:
+    aliases: sj
+    trigger:
+        if {slimejump.%player's uuid%} isn't set:
+            set {slimejump.%player's uuid%} to true
+            send "&aSlimeJump has been enabled."
+        else if {slimejump.%player's uuid%} is set:
+            delete {slimejump.%player's uuid%}
+            send "&cSlimeJump has been disabled."
+
+command sjconfig <text> [<number>]:
+    permission: op
+    usage: &c/sjconfig <upward/reset> [<number>]
+    trigger:
+        if arg 1 = "upward":
+            if arg 2 isn't set:
+                send "&aCurrent upward speed is %{slimejump::settings::upward}%&a."
+            else:
+                set {slimejump::settings::upward} to arg 2
+                send "&aChanged upward speed to %arg 2%&a."
+        if arg 1 = "reset":
+            set {slimejump::settings::upward} to 10
+            send "&aResetted variables."

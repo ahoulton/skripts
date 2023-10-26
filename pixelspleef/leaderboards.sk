@@ -1,0 +1,88 @@
+function refreshLB(t: text):
+    if {_t} is "deaths":
+        send "deaths variable is empty" to all players if {stats::wins::*} isn't set
+        loop {stats::deaths::*}:
+            add 1 to {_size}
+            if {_low.to.high.list::%loop-value%} is not set:
+                set {_low.to.high.list::%loop-value%} to loop-index
+            else:
+                set {_n} to 0
+                loop {_size} times:
+                    set {_n} to {_n}+1
+                    {_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+                    set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+                    stop loop
+        wait 1 tick
+        set {_n} to size of {_low.to.high.list::*}
+        loop {_low.to.high.list::*}:
+            set {_high.to.low.list::%{_n}%} to loop-value
+            set {_n} to {_n}-1
+        wait 1 tick
+        set {_line} to 3
+        loop {_high.to.low.list::*}:
+            add 1 to {_result}
+            set {_name} to loop-value parsed as offline player
+            make console execute command "holo setline lb-deaths %{_line}% &a%{_name}%&8: &e%{stats::deaths::%loop-value%}%"
+            add 1 to {_line}
+            if {_result} is 10:
+                stop
+    if {_t} is "wins":
+        send "wins variable is empty" to all players if {stats::wins::*} isn't set
+        loop {stats::wins::*}:
+            add 1 to {_size}
+            if {_low.to.high.list::%loop-value%} is not set:
+                set {_low.to.high.list::%loop-value%} to loop-index
+            else:
+                set {_n} to 0
+                loop {_size} times:
+                    set {_n} to {_n}+1
+                    {_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+                    set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+                    stop loop
+        wait 1 tick
+        set {_n} to size of {_low.to.high.list::*}
+        loop {_low.to.high.list::*}:
+            set {_high.to.low.list::%{_n}%} to loop-value
+            set {_n} to {_n}-1
+        wait 1 tick
+        set {_line} to 3
+        loop {_high.to.low.list::*}:
+            add 1 to {_result}
+            set {_name} to loop-value parsed as offline player
+            make console execute command "holo setline lb-wins %{_line}% &a%{_name}%&8: &e%{stats::wins::%loop-value%}%"
+            add 1 to {_line}
+            if {_result} is 10:
+                stop
+    if {_t} is "winstreak":
+        send "winstreak variable is empty" to all players if {stats::wins::*} isn't set
+        loop {stats::wins::*}:
+            add 1 to {_size}
+            if {_low.to.high.list::%loop-value%} is not set:
+                set {_low.to.high.list::%loop-value%} to loop-index
+            else:
+                set {_n} to 0
+                loop {_size} times:
+                    set {_n} to {_n}+1
+                    {_low.to.high.list::%loop-value-1%.%{_n}%} is not set
+                    set {_low.to.high.list::%loop-value-1%.%{_n}%} to loop-index
+                    stop loop
+        wait 1 tick
+        set {_n} to size of {_low.to.high.list::*}
+        loop {_low.to.high.list::*}:
+            set {_high.to.low.list::%{_n}%} to loop-value
+            set {_n} to {_n}-1
+        wait 1 tick
+        set {_line} to 3
+        loop {_high.to.low.list::*}:
+            add 1 to {_result}
+            set {_name} to loop-value parsed as offline player
+            make console execute command "holo setline lb-winstreak %{_line}% &a%{_name}%&8: &e%{stats::winstreak::%loop-value%}%"
+            add 1 to {_line}
+            if {_result} is 10:
+                stop
+
+every 10 minutes:
+    refreshLB("deaths")
+    refreshLB("wins")
+    refreshLB("winstreak")
+    send "&aLeaderboards have been refreshed!" to all players

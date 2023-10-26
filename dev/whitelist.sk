@@ -1,0 +1,74 @@
+options:
+    prefix: &dHoulton &8-
+    pcolour: &d
+    scolour: &7
+    dwlm: &cThis server is whitelisted.
+    twlm: &cThis server is whitelisted.
+
+on connect:
+    {server::whitelisted} is true
+    if {server::whitelist-mode} is "testers":
+        player doesn't have permission "whitelist.testers.bypass" or "whitelist.staff.bypass" or "*"
+        kick player due to "{@prefix} {@twlm}"
+        send action bar "{@prefix} {@pcolour}%player% {@scolour}tried to connect but isn't whitelisted. {@scolour}({@pcolour}currently: {@pcolour}%{server::whitelist-mode}%{@scolour})." to all players where [input has permission "whitelist.manage"]
+    if {server::whitelist-mode} is "staff":
+        player doesn't have permission "whitelist.staff.bypass" or "*"
+        kick player due to "{@prefix} {@dwlm}"
+        send action bar "{@prefix} {@pcolour}%player% {@scolour}tried to connect but isn't whitelisted. {@scolour}({@pcolour}currently: {@pcolour}%{server::whitelist-mode}%{@scolour})." to all players where [input has permission "whitelist.manage"]
+    if {server::whitelist-mode} is "admins":
+        player doesn't have permission "*"
+        kick player due to "{@prefix} {@dwlm}"
+        send action bar "{@prefix} {@pcolour}%player% {@scolour}tried to connect but isn't whitelisted. {@scolour}({@pcolour}currently: {@pcolour}%{server::whitelist-mode}%{@scolour})." to all players where [input has permission "whitelist.manage"]
+
+#on tab complete of "whitelist" or "skript:whitelist":
+    #set tab completions for position 1 to "testers", "staff", "admins", "off", "on"
+
+on command:
+    command is "minecraft:whitelist"
+    executor isn't console
+    cancel event
+    send "{@prefix} &cThe default whitelisting system is disabled on this server."
+
+command whitelistme <offline player>:
+    permission: whitelist.manage
+    permission message: &cYou cannot manage our whitelist.
+    usage: &cCorrect usage: /whitelistme <player>
+    trigger:
+        make sender execute command "lp user %arg 1% permission set whitelist.testers.bypass"
+        send "{@prefix} {@pcolour}%sender% {@scolour}has given {@pcolour}%arg 1% {@scolour}tester status." to all players where [input has permission "whitelist.manage"]
+
+command whitelist <text>:
+    permission: whitelist.manage
+    permission message: &cYou cannot manage our whitelist.
+    usage: &cCorrect usage: /whitelist <admins/testers/staff/off/on>
+    trigger:
+        if arg 1 is "testers":
+            if {server::whitelist-mode} is arg 1:
+                send "{@prefix} &cWhitelist is already '%arg 1%&c'." to sender
+                stop
+            set {server::whitelist-mode} to arg 1
+            send "{@prefix} {@pcolour}%sender% {@scolour}has changed the whitelist mode to '%arg 1%{@scolour}'." to all players
+        if arg 1 is "staff":
+            if {server::whitelist-mode} is arg 1:
+                send "{@prefix} &cWhitelist is already '%arg 1%&c'." to sender
+                stop
+            set {server::whitelist-mode} to arg 1
+            send "{@prefix} {@pcolour}%sender% {@scolour}has changed the whitelist mode to '%arg 1%{@scolour}'." to all players
+        if arg 1 is "admins":
+            if {server::whitelist-mode} is arg 1:
+                send "{@prefix} &cWhitelist is already '%arg 1%&c'." to sender
+                stop
+            set {server::whitelist-mode} to arg 1
+            send "{@prefix} {@pcolour}%sender% {@scolour}has changed the whitelist mode to '%arg 1%{@scolour}'." to all players
+        if arg 1 is "off":
+            if {server::whitelisted} is false:
+                send "{@prefix} &cWhitelist is already disabled." to sender
+                stop
+            set {server::whitelisted} to false
+            send "{@prefix} &aWhitelist is now disabled." to sender
+        if arg 1 is "on":
+            if {server::whitelisted} is true:
+                send "{@prefix} &cWhitelist is already enabled." to sender
+                stop
+            set {server::whitelisted} to true
+            send "{@prefix} &aWhitelist is now enabled." to sender

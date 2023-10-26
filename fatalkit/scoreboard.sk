@@ -1,0 +1,22 @@
+on join:
+	setup skoreboard for player
+	if player has a skoreboard:
+		set title of skoreboard player to "&7- &cfatalkit &7-"
+		set slot 1 of skoreboard player to "&0"
+		set slot 2 of skoreboard player to "&7You:"
+		set slot 6 of skoreboard player to "&0"
+		set slot 7 of skoreboard player to "&7Server:"
+		set slot 10 of skoreboard player to "&0"
+		set slot 11 of skoreboard player to "&ffatalkit.minehut.gg"
+	while player is online:
+		set {_uuid} to player's uuid
+		set {_d} to {stats::%{_uuid}%::deaths}
+		set {_k} to {stats::%{_uuid}%::kills}
+		set {_l} to getLevel(player)
+		set {_tj} to amount of {totaljoins::*}
+		set slot 3 of skoreboard player to "&7| Level: &6%{_l}%"
+		set slot 4 of skoreboard player to "&7| Kills: &a%{_k}%"
+		set slot 5 of skoreboard player to "&7| Deaths: &c%{_d}%"
+		set slot 8 of skoreboard player to "&7| Online: &6%amount of all players%"
+		set slot 9 of skoreboard player to "&7| Joins: &6%{_tj}%"
+		wait 1 second

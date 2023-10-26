@@ -1,0 +1,25 @@
+on chat:
+    set {_color} to "&7" if player's group is "default"
+    set {_color} to "&f" if player's group isn't "default"
+    set chat format to "%player's prefix%%player%%{_color}%: %{_color}%%message%"
+
+command /advertise <text> <text>:
+    aliases: /ad
+    executable by: players
+    usage: &cInvaild sub-command. Please use: &r/advertise <server> <message>
+    trigger:
+        set {_length} to length of arg-1
+        replace all "&" with "" in {_length}
+        if {_length} > 12:
+            send "&cThat server name doesn't meet Minehut's requirements, please try again."
+            stop
+        if difference between {adcooldown::%player's uuid%} and now < 5 second:
+            send "&cToo quick! It's been &7%difference between {adcooldown::%player's uuid%} and now% &csince your last advertisement."
+            stop
+        set {adcooldown::%player's uuid%} to now
+        set {_color} to "&7" if player's group is "default"
+        set {_color} to "&f" if player's group isn't "default"
+        set {_ad} to colored argument 2 if player's group isn't "default"
+        set {_ad} to argument 2 if player's group is "default"
+        replace all "&k" with "" in {_ad}
+        send "&d[AD] %player's prefix%%player%%{_color}%: /join %arg 1% %{_ad}%" to all players

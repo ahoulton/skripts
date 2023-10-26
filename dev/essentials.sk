@@ -1,0 +1,284 @@
+options:
+    permmsg: &cYou don't have enough rights to use this command. # This message will show if the player doesn't have permission for any commands in this file.
+
+on join:
+    teleport player to {spawn} if {spawn} is set
+
+on respawn:
+    teleport player to {spawn} if {spawn} is set
+
+command /announce <text>:
+    aliases: /alert, /broadcast
+    permission: op
+    permission message: {@permmsg}
+    trigger:
+        send "&8[&cAlert&8] &f%arg 1%" to all players
+
+command /fly [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/fly [<player>]
+    trigger:
+        if arg 1 isn't set:
+            if player's flight mode is false:
+                set player's flight mode to true
+                send "Enabled flight, you can now fly."
+            else if player's flight mode is true:
+                set player's flight mode to false
+                send "Disabled flight, you can no longer fly."
+        if arg 1 is set:
+            if arg 1 is sender:
+                send "If you want to toggle flight for yourself, do /fly without arguments."
+            else:
+                if arg 1's flight mode is false:
+                    set arg 1's flight mode to true
+                    send "Enabled flight for %arg 1%, they can now fly."
+                    send "%sender% has enabled flight for you, you can now fly." to arg-1
+                else if arg 1's flight mode is true:
+                    set arg 1's flight mode to false
+                    send "Disabled flight for %arg 1%, they can no longer fly."
+                    send "%sender% has disabled flight for you, you can no longer fly." to arg-1
+
+command /gamemode <text> [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/gamemode <gamemode> [<player>]
+    aliases: /gm
+    trigger:
+        if arg 2 isn't set:
+            if arg 1 is "adventure" or "a":
+                if player's gamemode isn't adventure:
+                    set player's gamemode to adventure
+                    send "Your gamemode has been changed to adventure."
+                else:
+                    send "You are already in adventure."
+            if arg 1 is "creative" or "c":
+                if player's gamemode isn't creative:
+                    set player's gamemode to creative
+                    send "Your gamemode has been changed to creative."
+                else:
+                    send "You are already in creative."
+            if arg 1 is "survival" or "s":
+                if player's gamemode isn't survival:
+                    set player's gamemode to survival
+                    send "Your gamemode has been changed to survival."
+                else:
+                    send "You are already in survival."
+            if arg 1 is "spectator" or "spec":
+                if player's gamemode isn't spectator:
+                    set player's gamemode to spectator
+                    send "Your gamemode has been changed to spectator."
+                else:
+                    send "You are already in spectator."
+        if arg 2 is set:
+            if arg 2 is sender:
+                send "Please use /gm <gamemode> without the second argument to set your own gamemode."
+            else:
+                if arg 1 is "adventure" or "a":
+                    if arg 2's gamemode isn't adventure:
+                        set arg 2's gamemode to adventure
+                        send "%arg 2%'s gamemode has been changed to adventure." to sender
+                        send "Your gamemode has been updated to adventure by %sender%" to arg 2
+                    else:
+                        send "%arg 2% is already in adventure."
+                if arg 1 is "creative" or "c":
+                    if arg 2's gamemode isn't creative:
+                        set arg 2's gamemode to creative
+                        send "%arg 2%'s gamemode has been changed to creative." to sender
+                        send "Your gamemode has been updated to creative by %sender%" to arg 2
+                    else:
+                        send "%arg 2% is already in creative."
+                if arg 1 is "survival" or "s":
+                    if arg 2's gamemode isn't survival:
+                        set arg 2's gamemode to survival
+                        send "%arg 2%'s gamemode has been changed to survival." to sender
+                        send "Your gamemode has been updated to survival by %sender%" to arg 2
+                    else:
+                        send "%arg 2% is already in survival."
+                if arg 1 is "spectator" or "spec":
+                    if arg 2's gamemode isn't spectator:
+                        set arg 2's gamemode to spectator
+                        send "%arg 2%'s gamemode has been changed to spectator." to sender
+                        send "Your gamemode has been updated to spectator by %sender%" to arg 2
+                    else:
+                        send "%arg 2% is already in spectator."
+
+command /gma [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/gma [<player>]
+    trigger:
+        if arg 1 isn't set:
+            make sender execute command "/gamemode adventure"
+        else if arg 1 is set:
+            make sender execute command "/gamemode adventure %arg 1%"
+
+command /gmc [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/gmc [<player>]
+    trigger:
+        if arg 1 isn't set:
+            make sender execute command "/gamemode creative"
+        else if arg 1 is set:
+            make sender execute command "/gamemode creative %arg 1%"
+
+command /gms [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/gms [<player>]
+    trigger:
+        if arg 1 isn't set:
+            make sender execute command "/gamemode survival"
+        else if arg 1 is set:
+            make sender execute command "/gamemode survival %arg 1%"
+
+command /gmsp [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/gmsp [<player>]
+    trigger:
+        if arg 1 isn't set:
+            make sender execute command "/gamemode spectator"
+        else if arg 1 is set:
+            make sender execute command "/gamemode spectator %arg 1%"
+
+command /rename <text>:
+    permission: op
+    permission message: {@permmsg}
+    trigger:
+        if player's held item isn't air:
+            set name of player's held item to colored arg 1
+            send "&7Changed item name to &d%colored arg 1%&7."
+        else if player's held item is air:
+            send "&cYou need to hold the item that you wish to rename."
+                    
+command /setspawn:
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    trigger:
+        set {spawn} to player's location
+        send "Spawn has been set to your location."
+        
+command /spawn:
+    trigger:
+        teleport player to {spawn} if {spawn} is set
+        send "&cSpawn isn't set!" if {spawn} isn't set
+        stop if {spawn} isn't set
+
+command /push <player> <number> [<number>]:
+    permission: op
+    permission message: {@permmsg}
+    usage: &c/push <player> <number> [<number>]
+    trigger:
+        if arg 3 isn't set:
+            push arg-1 forwards at speed arg-2
+            push arg-1 upwards at speed arg-2
+            send action bar "&d%arg 1% &7was pushed forward and upwards by &d%arg 2%&7." to sender
+        if arg 3 is set:
+            push arg-1 forwards at speed arg-2
+            push arg-1 upwards at speed arg-3
+            send action bar "&d%arg 1% &7was pushed forward by &d%arg 2% &7and upwards by &d%arg 3%&7." to sender
+
+on left click:
+    if {powertool::%player's uuid%::command} is set:
+        if {powertool::%player's uuid%::item} is "%player's held item%":
+            cancel event
+            make player execute command "%{powertool::%player's uuid%::command}%"
+
+on right click:
+    if {powertool::%player's uuid%::command} is set:
+        if {powertool::%player's uuid%::item} is "%player's held item%":
+            cancel event
+            make player execute command "%{powertool::%player's uuid%::command}%"
+
+command /powertool [<text>]:
+    aliases: /pt
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    usage: &c/powertool <command>
+    trigger:
+        if arg 1 isn't set:
+            if {powertool::%player's uuid%::command} and {powertool::%player's uuid%::item} isn't set:
+                send "&7You don't have a powertool attached."
+            else:
+                delete {powertool::%player's uuid%::command}
+                delete {powertool::%player's uuid%::item}
+                send "&7Removed powertool."
+        else if arg 1 is set:
+            set {powertool::%player's uuid%::command} to "/%arg 1%"
+            set {powertool::%player's uuid%::item} to "%player's held item%"
+            send "&7Set powertool to &d/%arg 1% &7(%{powertool::%player's uuid%::item}%&7)"
+
+command /checkpt <offlineplayer>:
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    usage: &c/checkpt <player>
+    trigger:
+        if {powertool::%arg 1's uuid%::command} and {powertool::%arg 1's uuid%::item} isn't set:
+            send "&c%arg 1% &7has no powertool assigned."
+        else:
+            send "&c%arg 1% &7has &d%{powertool::%arg 1's uuid%::command}% &7assigned with &d%{powertool::%arg 1's uuid%::item}%"
+
+on command:
+    event isn't cancelled
+    send "&b%player% &7has ran &b/%full command%" to all players where [{command-spying::*} contains input's uuid]
+
+command /commandspy:
+    executable by: players
+    permission: op
+    permission message: {@permmsg}
+    trigger:
+        if {command-spying::*} doesn't contain player's uuid:
+            add player's uuid to {command-spying::*}
+            send "&aYou are now spying commands." to player
+        else if {command-spying::*} contain player's uuid:
+            remove player's uuid from {command-spying::*}
+            send "&cYou are no longer spying commands." to player
+
+command /tp <player> [<player>]:
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    usage: &c/tp <player> [<player>]
+    trigger:
+        if arg 2 isn't set:
+            if arg 1 is sender:
+                send "You cannot teleport to yourself."
+            else:
+                set {_a} to arg 1
+                teleport player to {_a}
+                send "You have teleported to %arg 1%."
+        if arg 2 is set:
+            if arg 1 is sender:
+                send "You cannot teleport to yourself."
+            else:
+                set {_a} to arg 1
+                set {_b} to arg 2
+                teleport {_a} to {_b}
+                send "%arg 1% has been teleported to %arg 2%"
+
+command /tphere <player>:
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    usage: &c/tphere <player>
+    trigger:
+        if arg 1 is sender:
+            send "You cannot teleport yourself."
+        set {_a} to arg 1
+        teleport {_a} to player
+        send "%arg 1% was teleported to you."
+
+command /tpall:
+    permission: op
+    permission message: {@permmsg}
+    executable by: players
+    usage: &c/tpall
+    trigger:
+        loop all players:
+            teleport loop-player to sender
+        send "&7Teleported all online players to &dyou&7."

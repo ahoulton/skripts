@@ -1,0 +1,40 @@
+options:
+    pin: 1234
+
+function isAuthorized(p:player) :: boolean:
+    if {authorized::*} contains {_p}'s uuid:
+        return true
+    return false
+
+on command:
+    player is op
+    player has permission "*", "luckperms.*", "worldedit.*"
+    {authorized::*} doesn't contain player's uuid
+    cancel event
+    send "&cSince you have access to dangerous commands, you need to get your account authorized. You will not be able to run any commands as a safety measure in the meantime."
+
+command security:auth <offline player> <number>:
+    executable by: console
+    usage: security:auth <player> <pin>
+    trigger:
+        if arg 2 is "{@pin}" parsed as number:
+            if isAuthorized(arg 1) = false:
+                add arg 1's uuid to {authorized::*}
+                send "&a%arg 1% &ais now authorized." to console
+            else if isAuthorized(arg 1) = true:
+                send "&c%arg 1% &cis already authorized." to console
+        else if arg 2 isn't "{@pin}" parsed as number:
+            send "&cInvaild PIN." to console
+
+command security:unauth <offline player> <number>:
+    executable by: console
+    usage: security:unauth <player> <pin>
+    trigger:
+        if arg 2 is "{@pin}" parsed as number:
+            if isAuthorized(arg 1) = true:
+                remove arg 1's uuid from {authorized::*}
+                send "&c%arg 1% &cis no longer authorized." to console
+            else if isAuthorized(arg 1) = false:
+                send "&c%arg 1% &cisn't authorized." to console
+        else if arg 2 isn't "{@pin}" parsed as number:
+            send "&cInvaild PIN." to console

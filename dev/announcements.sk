@@ -1,0 +1,26 @@
+function addAnnouncement(type: text, msg: text):
+    add "&c&lHELP &7- &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "help"
+    add "&e&lTIP &7- &f%colored {_msg}%" to {auto-announcements::*} if {_type} is "tip"
+
+every 2 minutes:
+    set {_a} to a random element out of {auto-announcements::*} if {auto-announcements::*} is set
+    send "%nl%%{_a}%%nl%" to all players if {auto-announcements::*} is set
+
+command debug:announcements:
+    permission: op
+    trigger:
+        send "&rAnnouncements:%nl%%{auto-announcements::*}%%nl%%nl%&rAmount of announcements: %amount of {auto-announcements::*}%" to sender
+
+command announcement:help <text>:
+    permission: op
+    trigger:
+        send "%nl%&c&lHELP &7- &f%colored arg-1%%nl%" to all players
+
+command announcement:tip <text>:
+    permission: op
+    trigger:
+        send "%nl%&e&lTIP &7- &f%colored arg-1%%nl%" to all players
+
+on load:
+    delete {auto-announcements::*} if {auto-announcements::*} is set
+    #addAnnouncement("help", "MESSAGE HERE [COLOR CODES SUPPORTED]")

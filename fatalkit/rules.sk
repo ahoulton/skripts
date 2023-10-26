@@ -1,0 +1,25 @@
+on load:
+	delete {rules::*} if {rules::*} is set
+	add "Don't exploit loop holes within our rules, report it." to {rules::*}
+	add "Don't feed into trolls! Report them." to {rules::*}
+	add "Have common sense." to {rules::*}
+	add "Listen to staff at all times." to {rules::*}
+	add "No cheating or having a unfair advantage (this includes bug/exploit abusing)." to {rules::*}
+	add "No hatred towards other players/groups." to {rules::*}
+	add "Respect staff and other players." to {rules::*}
+	add "Respect and follow Minehut's guidelines/rules.%nl%&eFailure to do so will result in a instant removal and further action may be taken." to {rules::*}
+
+on unload:
+	delete {rules::*} if {rules::*} is set
+
+command /rules:
+	trigger:
+		create a gui with virtual chest inventory with 3 rows named "Rules":
+			make gui 4 with nametag named "&6Note&7:" with lore "%nl%&eWe are not overly strict with our rules,%nl%&emost of these should come under as common sense.%nl%%nl%&eAny questions should be asked to staff or you can make a &6/request&e."
+			set {_slot} to 9
+			set {_rule} to 1
+			loop {rules::*}:
+				make gui {_slot} with paper named "&6Rule &e%{_rule}%&7:" with lore "%nl%&e%loop-value%"
+				add 1 to {_slot}
+				add 1 to {_rule}
+		open last gui for player

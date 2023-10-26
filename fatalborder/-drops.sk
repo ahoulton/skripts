@@ -1,0 +1,11 @@
+on break of tall grass or short grass:    
+    set {_l} to event-block's location
+    set {_r} to a random integer between 1 and 2
+    drop 1 apple at {_l} if {_r} is 1
+    drop 2 apple at {_l} if {_r} is 2
+
+on break of any leaves:
+    set {_l} to event-block's location
+    set {_r} to a random integer between 0 and 20
+    drop 1 apple at {_l} if {_r} is 0
+    drop 2 apple at {_l} if {_r} is 20

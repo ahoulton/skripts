@@ -1,0 +1,39 @@
+function isinCombat(p: player) :: boolean:
+	set {_uuid} to {_p}'s uuid
+	return true if {combat::timer::%{_uuid}%} is set
+	return false if {combat::timer::%{_uuid}%} isn't set
+
+on damage:
+	attacker is a player
+	victim is a player
+	attacker is not victim
+	set {combat::timer::%victim's uuid%} to 15 seconds
+	set {combat::timer::%attacker's uuid%} to 15 seconds
+	set {combat::attacker::%victim's uuid%} to attacker
+	set {_a} to attacker
+	set {_v} to victim
+	while {combat::timer::%attacker's uuid%} or {combat::timer::%victim's uuid%} is set:
+		send action bar "&cPlease wait &f%{combat::timer::%attacker's uuid%}% &cbefore logging out!" to {_a} if {combat::timer::%attacker's uuid%} is set
+		send action bar "&cPlease wait &f%{combat::timer::%victim's uuid%}% &cbefore logging out!" to {_v} if {combat::timer::%victim's uuid%} is set
+		wait 1 second
+
+on death:
+      delete {combat::timer::%victim's uuid%}
+
+every 1 second:
+      loop {combat::timer::*}:
+            remove 1 second from {combat::timer::%loop-index%}
+            if {combat::timer::%loop-index%} < 1 second:
+                  delete {combat::timer::*}
+
+on disconnect:
+	if {combat::timer::%player's uuid%} is set:
+		send "&c%player%&f has combat logged." to all players
+
+on join:
+      delete {combat::timer::%player's uuid%}
+
+command /cl:test:
+      permission: op
+      trigger:
+            set {combat::timer::%player's uuid%} to 10 seconds

@@ -1,0 +1,9 @@
+on join:
+    setup skoreboard for player
+    while player is online:
+        if player has a skoreboard:
+            set title of skoreboard player to "&8- &dHoulton &8-"
+            set slot 3 of skoreboard player to ""
+            set slot 2 of skoreboard player to "&3TPS: &b%tps from last 1m%"
+            set slot 1 of skoreboard player to ""
+        wait 0.4 second

@@ -1,0 +1,24 @@
+on load:
+	set {whitelist} to false if {whitelist} isn't set
+
+on connect:
+	{whitelist} is true
+	player doesn't have permission "whitelist.bypass"
+	kick player due to "&cPixelCanva is currently under maintenance, please try connecting again later."
+	
+command /whitelist <boolean>:
+	permission: staff.whitelist
+	usage: &cCorrect usage: /whitelist <true/false>
+	trigger:
+		if arg 1 is true:
+			if {whitelist} is true:
+				send "&cWhitelist is already enabled, nothing has been changed." to sender
+				stop
+			set {whitelist} to true
+			send "&aEnabled whitelist."
+		else if arg 1 is false:
+			if {whitelist} is false:
+				send "&cWhitelist is already disabled, nothing has been changed." to sender
+				stop
+			set {whitelist} to false
+			send "&cDisabled whitelist."

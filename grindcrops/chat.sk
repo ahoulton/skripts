@@ -1,0 +1,75 @@
+command /chatcolor:
+    aliases: /chatcolour
+    trigger:
+        create a gui with virtual chest inventory with 3 rows named "&7Select your chat color!"
+        edit gui last gui:
+            make gui (integers between 0 and 26) with black stained glass pane named "&7":
+                stop
+            make gui 10 with blue stained glass pane named "&9Blue":
+                if {data::%player's uuid%::chatcolor} is "&9":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&9"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 11 with green stained glass pane named "&aGreen":
+                if {data::%player's uuid%::chatcolor} is "&a":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&a"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 12 with light blue stained glass pane named "&bLight Blue":
+                if {data::%player's uuid%::chatcolor} is "&b":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&b"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 13 with orange stained glass pane named "&6Orange":
+                if {data::%player's uuid%::chatcolor} is "&6":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&6"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 14 with red stained glass pane named "&cRed":
+                if {data::%player's uuid%::chatcolor} is "&c":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&c"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 15 with pink stained glass pane named "&dPink":
+                if {data::%player's uuid%::chatcolor} is "&d":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&d"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 16 with yellow stained glass pane named "&eYellow":
+                if {data::%player's uuid%::chatcolor} is "&e":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&e"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+            make gui 22 with barrier named "&7Reset.":
+                if {data::%player's uuid%::chatcolor} is "&7" or "&f":
+                    send "&6&lCHAT COLOR &7| &cYour chat color is already %colored {data::%player's uuid%::chatcolor}%this."
+                    stop
+                set {data::%player's uuid%::chatcolor} to "&7" if player doesn't have permission "server.vip"
+                set {data::%player's uuid%::chatcolor} to "&f" if player has permission "server.vip"
+                send "&6&lCHAT COLOR &7| &aChanged to:%nl%%player's prefix%%player%: %colored {data::%player's uuid%::chatcolor}%This is a example message."
+                close inventory for player
+        open the created gui for player
+
+on chat:
+    if player's group is "default":
+        set {_c} to "&7"
+        set {_cc} to "&7"
+    if player's group isn't "default":
+        set {_c} to "&f" 
+        set {_cc} to "&f"
+    set {_cc} to formatted {data::%player's uuid%::chatcolor} if {data::%player's uuid%::chatcolor} is set
+    set chat format to "%player's prefix%%player%%player's suffix%%{_c}%: %{_cc}%%message%"
